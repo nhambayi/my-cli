@@ -1,0 +1,22 @@
+{
+  "name": "my-cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "minimist": "^1.2.0",
+    "ts-loader": "^1.2.2",
+    "typescript": "^2.0.10"
+  },
+  "dependencies": {
+    "anyid": "^1.0.1",
+    "fs": "0.0.1-security",
+    "open": "0.0.5",
+    "open-in-editor": "^1.2.1"
+  }
+}
