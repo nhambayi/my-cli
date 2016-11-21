@@ -1,7 +1,7 @@
 {
   "name": "my-cli",
   "version": "1.0.0",
-  "description": "",
+  "description": "Generic CLI",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,6 +16,7 @@
   "dependencies": {
     "anyid": "^1.0.1",
     "fs": "0.0.1-security",
+    "handlebars": "^4.0.6",
     "open": "0.0.5",
     "open-in-editor": "^1.2.1"
   }
