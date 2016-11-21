@@ -1,7 +1,7 @@
 export class Template {
-    id: string
-    filename: string
-    extension: string
-    type: string
+    id: string;
+    filename: string;
+    extension: string;
+    type: string;
 }
 

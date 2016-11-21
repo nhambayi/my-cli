@@ -1,16 +1,27 @@
-import * as minimist from 'minimist';
-import * as fs from 'fs';
-import { anyid } from 'anyid';
-import * as crypto from 'crypto';
-import { Template } from './Template';
-import { TemplateDatabase } from './TemplateDatabase';
-import { SerializationHelper } from './SerializationHelper';
-import { Arguments, Command } from './Arguments';
-import { compile, template } from 'handlebars';
+import * as minimist from "minimist";
+import * as fs from "fs";
+import {anyid} from "anyid";
+import {Template} from "./Template";
+import { TemplateDatabase } from "./TemplateDatabase";
+import { SerializationHelper } from "./SerializationHelper";
+import { Arguments, Command } from "./Arguments";
+import { compile, template } from "handlebars";
+import * as program from "commander";
 
-var openInEditor = require('open-in-editor');
+const openInEditor = require("open-in-editor");
+const crypto = require("crypto");
 
-console.log("MY-CLI");
+console.log("Welcome to TBD");
+
+program
+  .version("0.10.0")
+  .command("create [name]", "create a new template")
+  .command("list", "list all templates", {isDefault: true})
+  .option("-t, --template", "template")
+  .option("-o, --output", "output filename")
+  .option("-f, --from", "template source file")
+  .option("-c, --cheese [type]", "add the specified type of cheese [marble]", "marble")
+  .parse(process.argv);
 
 function getUserHome() {
     return process.env.HOME || process.env.USERPROFILE;
@@ -21,21 +32,21 @@ const homeFolder = getUserHome();
 let parserOptions = {
     default: {
         "new": false,
-        alias: { h: 'help', v: 'version' },
+        alias: { h: "help", v: "version" },
         "templateFolder": `${homeFolder}/.my-templates/`
     }
 };
 
 const args = minimist(process.argv.slice(2), parserOptions);
 
-if(args["verbose"]) {
+if (args["verbose"]) {
     console.log(args);
 }
 
 let exists = fs.existsSync(args["templateFolder"]);
 
-if (exists == false) {
-    console.log("Initializing template db...")
+if (exists === false) {
+    console.log("Initializing template db...");
     fs.mkdir(args["templateFolder"]);
     fs.mkdir(`${args["templateFolder"]}/templates`);
 
@@ -50,13 +61,13 @@ if (exists == false) {
 }
 
 if (args["list"]) {
-    fs.readFile(args["templateFolder"] + "/.template-index.json", 'utf8', function(err, data) {
+    fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function(err, data) {
         if (err) {
             return console.log(err);
         }
-        var db = SerializationHelper.toInstance(new TemplateDatabase(), data);
+        let db = SerializationHelper.toInstance(new TemplateDatabase(), data);
 
-        console.log('NAME\t\t\tFILENAME')
+        console.log("NAME\t\t\tFILENAME");
         for (let entry of db.templates) {
 
             console.log(`${entry.id}\t\t${entry.filename}\t${entry.extension}`);
@@ -64,19 +75,19 @@ if (args["list"]) {
     });
 }
 
-if (args["new"] == true) {
-    require('crypto').randomBytes(12, function(err, buffer) {
-        var token = buffer.toString('hex');
+if (args["new"] === true) {
+    crypto.randomBytes(12, function(err, buffer) {
+        const token = buffer.toString("hex");
 
-        fs.readFile(args["templateFolder"] + "/.template-index.json", 'utf8', function(err, data) {
+        fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function(err, data) {
             if (err) {
                 return console.log(err);
             }
-            var db = SerializationHelper.toInstance(new TemplateDatabase(), data);
-            var templates = db.templates.filter(item => item.id == args["name"]);
+            const db = SerializationHelper.toInstance(new TemplateDatabase(), data);
+            const templates = db.templates.filter(item => item.id === args["name"]);
 
             if (templates.length === 0) {
-                var template = new Template();
+                let template = new Template();
                 template.filename = token;
                 template.id = args["name"];
                 db.templates.push(template);
@@ -96,8 +107,8 @@ if (args["new"] == true) {
     });
 }
 
-if (args["add"] == true) {
-    fs.readFile(args["templateFolder"] + "/.template-index.json", 'utf8', function(err, data) {
+if (args["add"] === true) {
+    fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function(err, data) {
         if (err) {
             return console.log(err);
         }
@@ -110,15 +121,15 @@ if (args["add"] == true) {
             extension: "tsx"
         };
 
-        var db = SerializationHelper.toInstance(new TemplateDatabase(), data);
-        var templates = db.templates.filter(item => item.id == args["t"]);
+        const db = SerializationHelper.toInstance(new TemplateDatabase(), data);
+        let templates = db.templates.filter(item => item.id === args["t"]);
 
-        if (templates.length == 0) {
-            console.log(`'${args['t']}' template not found`);
+        if (templates.length === 0) {
+            console.log(`'${args["t"]}' template not found`);
 
         } else {
 
-            var template = templates[0];
+            let template = templates[0];
 
             fs.readFile(`${args["templateFolder"]}/templates/${template.filename}`, "utf-8", function(err, templateText) {
                 if (err) {
@@ -138,41 +149,41 @@ if (args["add"] == true) {
     });
 }
 
-if (args["edit"] == true) {
+if (args["edit"] === true) {
 
-    fs.readFile(args["templateFolder"] + "/.template-index.json", 'utf8', function(err, data) {
+    fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function(err, data) {
         if (err) {
             return console.log(err);
         }
-        var db = SerializationHelper.toInstance(new TemplateDatabase(), data);
-        var templates = db.templates.filter(item => item.id == args["t"]);
+        const db = SerializationHelper.toInstance(new TemplateDatabase(), data);
+        let templates = db.templates.filter(item => item.id === args["t"]);
 
-        if (templates.length == 0) {
-            console.log(`'${args['t']}' template not found`);
+        if (templates.length === 0) {
+            console.log(`'${args["t"]}' template not found`);
         }
-        var template = templates[0];
+        let template = templates[0];
 
-        var editor = openInEditor.configure({
-            editor: 'code'
+        let editor = openInEditor.configure({
+            editor: "code"
         }, function(err) {
-            console.error('Something went wrong: ' + err);
+            console.error("Something went wrong: " + err);
         });
 
-        editor.open(args["templateFolder"] + '/templates/' + template.filename)
+        editor.open(args["templateFolder"] + "/templates/" + template.filename)
             .then(function() {
-                console.log('Success!');
+                console.log("Success!");
             }, function(err) {
-                console.error('Something went wrong: ' + err);
+                console.error("Something went wrong: " + err);
             });
     });
 
 
 }
 
-if (args["help"] == true) {
+if (args["help"] === true) {
     console.log("Help Info");
 }
 
-if (args["error"] == true) {
+if (args["error"] === true) {
 
 }

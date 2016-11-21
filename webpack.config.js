@@ -1,15 +1,23 @@
-module.exports = {  
-  target: 'node',
-  entry: './src/Index.ts',
+module.exports = {
+  target: "node",
+  entry: {
+    index: "./src/Index.ts",
+    list : "./src/commands/ListCommand",
+    edit : "./src/commands/EditCommand",
+    create : "./src/commands/CreateCommand",
+    tests: "./src/Tests/IndexTest.ts"
+  },
   output: {
-    filename: './dist/index.js'
+    path: "./tmp",
+    filename: "index-[name].js"
   },
   resolve: {
-    extensions: ['', '.webpack.js', '.web.js', '.ts', '.js']
+    extensions: ["", ".webpack.js", ".web.js", ".ts", ".js"]
   },
   module: {
     loaders: [
-      { test: /\.ts$/, loader: 'ts-loader' }
+      { test: /\.ts$/, loader: "ts-loader" }
     ]
-  }
-}
+  },
+  devtool: "source-map"
+};

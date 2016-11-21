@@ -1,5 +1,5 @@
 export class Arguments {
-    
+
 }
 
 export enum Command {
@@ -10,7 +10,7 @@ export enum Command {
     Edit
 }
 
-export function Parse():Arguments {
+export function Parse(): Arguments {
     return new Arguments();
 }
 

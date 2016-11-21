@@ -3,7 +3,7 @@
     "module": "commonjs"
   },
   "files": [
-    "src/Index.ts",
+    "src/tests/IndexTest.ts",
     "typings/tsd.d.ts"
   ]
 }

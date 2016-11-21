@@ -16,6 +16,12 @@
     },
     "handlebars/handlebars.d.ts": {
       "commit": "55978642a28584b258e511046b9fb9d09c8a80a4"
+    },
+    "commander/commander.d.ts": {
+      "commit": "55978642a28584b258e511046b9fb9d09c8a80a4"
+    },
+    "mocha/mocha.d.ts": {
+      "commit": "55978642a28584b258e511046b9fb9d09c8a80a4"
     }
   }
 }
