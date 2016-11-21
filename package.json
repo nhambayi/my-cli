@@ -4,7 +4,7 @@
   "description": "Generic CLI",
   "main": "index.js",
   "scripts": {
-    "test": "mocha tmp/tests.js",
+    "test": "mocha tmp/index-tests.js",
     "lint": "tslint --fix --force ./src/**/*.ts"
   },
   "author": "",

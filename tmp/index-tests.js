@@ -47,6 +47,7 @@
 
 	"use strict";
 	__webpack_require__(58);
+	__webpack_require__(59);
 
 
 /***/ },
@@ -54,7 +55,14 @@
 /***/ 58:
 /***/ function(module, exports) {
 
-	describe("New Command", function () {
+
+
+/***/ },
+
+/***/ 59:
+/***/ function(module, exports) {
+
+	describe("Template Store", function () {
 	    var subject;
 	    beforeEach(function () {
 	        subject = "Hello Mocha";

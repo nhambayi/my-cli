@@ -40,17 +40,16 @@
 /******/ 	return __webpack_require__(0);
 /******/ })
 /************************************************************************/
-/******/ ({
-
-/***/ 0:
+/******/ ([
+/* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var fs = __webpack_require__(2);
-	var SerializationHelper_1 = __webpack_require__(5);
+	var fs = __webpack_require__(1);
+	var SerializationHelper_1 = __webpack_require__(2);
 	var Template_1 = __webpack_require__(3);
 	var TemplateDatabase_1 = __webpack_require__(4);
-	var crypto = __webpack_require__(57);
+	var crypto = __webpack_require__(5);
 	console.log("Creating...");
 	var CreateCommandArguments = (function () {
 	    function CreateCommandArguments() {
@@ -96,43 +95,13 @@
 
 
 /***/ },
-
-/***/ 2:
+/* 1 */
 /***/ function(module, exports) {
 
 	module.exports = require("fs");
 
 /***/ },
-
-/***/ 3:
-/***/ function(module, exports) {
-
-	"use strict";
-	var Template = (function () {
-	    function Template() {
-	    }
-	    return Template;
-	}());
-	exports.Template = Template;
-
-
-/***/ },
-
-/***/ 4:
-/***/ function(module, exports) {
-
-	"use strict";
-	var TemplateDatabase = (function () {
-	    function TemplateDatabase() {
-	    }
-	    return TemplateDatabase;
-	}());
-	exports.TemplateDatabase = TemplateDatabase;
-
-
-/***/ },
-
-/***/ 5:
+/* 2 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -157,13 +126,37 @@
 
 
 /***/ },
+/* 3 */
+/***/ function(module, exports) {
 
-/***/ 57:
+	"use strict";
+	var Template = (function () {
+	    function Template() {
+	    }
+	    return Template;
+	}());
+	exports.Template = Template;
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var TemplateDatabase = (function () {
+	    function TemplateDatabase() {
+	    }
+	    return TemplateDatabase;
+	}());
+	exports.TemplateDatabase = TemplateDatabase;
+
+
+/***/ },
+/* 5 */
 /***/ function(module, exports) {
 
 	module.exports = require("crypto");
 
 /***/ }
-
-/******/ });
+/******/ ]);
 //# sourceMappingURL=index-create.js.map

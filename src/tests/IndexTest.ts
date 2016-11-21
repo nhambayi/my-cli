@@ -1,1 +1,2 @@
-import "./NewCommandTest";
+import "./ListCommandTest";
+import "./TemplateStoreTest";

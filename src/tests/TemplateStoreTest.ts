@@ -1,4 +1,6 @@
-describe("New Command", () => {
+import {} from "../TemplateStore";
+
+describe("Template Store", () => {
     let subject: string;
 
     beforeEach(function () {
