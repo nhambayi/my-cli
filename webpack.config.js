@@ -1,6 +1,6 @@
 module.exports = {  
   target: 'node',
-  entry: './src/index.ts',
+  entry: './src/Index.ts',
   output: {
     filename: './dist/index.js'
   },

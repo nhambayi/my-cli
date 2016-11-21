@@ -27,13 +27,17 @@ let parserOptions = {
 };
 
 const args = minimist(process.argv.slice(2), parserOptions);
-console.log(args);
+
+if(args["verbose"]) {
+    console.log(args);
+}
 
 let exists = fs.existsSync(args["templateFolder"]);
 
 if (exists == false) {
     console.log("Initializing template db...")
     fs.mkdir(args["templateFolder"]);
+    fs.mkdir(`${args["templateFolder"]}/templates`);
 
     let db = new TemplateDatabase();
     db.templates = new Array<Template>();
@@ -61,11 +65,8 @@ if (args["list"]) {
 }
 
 if (args["new"] == true) {
-    require('crypto').randomBytes(20, function(err, buffer) {
+    require('crypto').randomBytes(12, function(err, buffer) {
         var token = buffer.toString('hex');
-
-        fs.createReadStream(args["from"])
-            .pipe(fs.createWriteStream(args["templateFolder"] + "/" + token));
 
         fs.readFile(args["templateFolder"] + "/.template-index.json", 'utf8', function(err, data) {
             if (err) {
@@ -74,11 +75,14 @@ if (args["new"] == true) {
             var db = SerializationHelper.toInstance(new TemplateDatabase(), data);
             var templates = db.templates.filter(item => item.id == args["name"]);
 
-            if (templates.length == 0) {
+            if (templates.length === 0) {
                 var template = new Template();
                 template.filename = token;
                 template.id = args["name"];
                 db.templates.push(template);
+
+                fs.createReadStream(args["from"])
+                    .pipe(fs.createWriteStream(args["templateFolder"] + "/templates/" + token));
 
                 fs.writeFile(args["templateFolder"] + "/.template-index.json", JSON.stringify(db), function(err) {
                     if (err) {
@@ -116,7 +120,7 @@ if (args["add"] == true) {
 
             var template = templates[0];
 
-            fs.readFile(`${args["templateFolder"]}/${template.filename}`, "utf-8", function(err, templateText) {
+            fs.readFile(`${args["templateFolder"]}/templates/${template.filename}`, "utf-8", function(err, templateText) {
                 if (err) {
                     console.log(err);
                     return;
@@ -154,7 +158,7 @@ if (args["edit"] == true) {
             console.error('Something went wrong: ' + err);
         });
 
-        editor.open(args["templateFolder"] + template.filename)
+        editor.open(args["templateFolder"] + '/templates/' + template.filename)
             .then(function() {
                 console.log('Success!');
             }, function(err) {
