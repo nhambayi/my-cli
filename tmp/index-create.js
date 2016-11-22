@@ -45,31 +45,26 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var fs = __webpack_require__(1);
-	var SerializationHelper_1 = __webpack_require__(2);
-	var Template_1 = __webpack_require__(3);
-	var TemplateDatabase_1 = __webpack_require__(4);
-	var crypto = __webpack_require__(5);
+	const fs = __webpack_require__(1);
+	const SerializationHelper_1 = __webpack_require__(2);
+	const Template_1 = __webpack_require__(3);
+	const TemplateDatabase_1 = __webpack_require__(4);
+	const crypto = __webpack_require__(5);
 	console.log("Creating...");
-	var CreateCommandArguments = (function () {
-	    function CreateCommandArguments() {
-	    }
-	    return CreateCommandArguments;
-	}());
-	var CreateCommand = (function () {
-	    function CreateCommand() {
-	    }
-	    CreateCommand.prototype.CreateTemplate = function (commandArgs) {
+	class CreateCommandArguments {
+	}
+	class CreateCommand {
+	    CreateTemplate(commandArgs) {
 	        crypto.randomBytes(12, function (err, buffer) {
-	            var token = buffer.toString("hex");
-	            fs.readFile(commandArgs.templateRootFolder + "/.template-index.json", "utf8", function (err, data) {
+	            const token = buffer.toString("hex");
+	            fs.readFile(`${commandArgs.templateRootFolder}/.template-index.json`, "utf8", function (err, data) {
 	                if (err) {
 	                    return console.log(err);
 	                }
-	                var db = SerializationHelper_1.SerializationHelper.toInstance(new TemplateDatabase_1.TemplateDatabase(), data);
-	                var templates = db.templates.filter(function (item) { return item.id === commandArgs.templateName; });
+	                const db = SerializationHelper_1.SerializationHelper.toInstance(new TemplateDatabase_1.TemplateDatabase(), data);
+	                const templates = db.templates.filter(item => item.id === commandArgs.templateName);
 	                if (templates.length === 0) {
-	                    var template = new Template_1.Template();
+	                    let template = new Template_1.Template();
 	                    template.filename = token;
 	                    template.id = commandArgs.templateName;
 	                    db.templates.push(template);
@@ -86,12 +81,11 @@
 	                }
 	            });
 	        });
-	    };
-	    CreateCommand.prototype.ValidateArguments = function (args) {
+	    }
+	    ValidateArguments(args) {
 	        return false;
-	    };
-	    return CreateCommand;
-	}());
+	    }
+	}
 
 
 /***/ },
@@ -105,23 +99,20 @@
 /***/ function(module, exports) {
 
 	"use strict";
-	var SerializationHelper = (function () {
-	    function SerializationHelper() {
-	    }
-	    SerializationHelper.toInstance = function (obj, json) {
-	        var jsonObj = JSON.parse(json);
+	class SerializationHelper {
+	    static toInstance(obj, json) {
+	        let jsonObj = JSON.parse(json);
 	        if (typeof obj["fromJSON"] === "function") {
 	            obj["fromJSON"](jsonObj);
 	        }
 	        else {
-	            for (var propName in jsonObj) {
+	            for (let propName in jsonObj) {
 	                obj[propName] = jsonObj[propName];
 	            }
 	        }
 	        return obj;
-	    };
-	    return SerializationHelper;
-	}());
+	    }
+	}
 	exports.SerializationHelper = SerializationHelper;
 
 
@@ -130,11 +121,8 @@
 /***/ function(module, exports) {
 
 	"use strict";
-	var Template = (function () {
-	    function Template() {
-	    }
-	    return Template;
-	}());
+	class Template {
+	}
 	exports.Template = Template;
 
 
@@ -143,11 +131,8 @@
 /***/ function(module, exports) {
 
 	"use strict";
-	var TemplateDatabase = (function () {
-	    function TemplateDatabase() {
-	    }
-	    return TemplateDatabase;
-	}());
+	class TemplateDatabase {
+	}
 	exports.TemplateDatabase = TemplateDatabase;
 
 

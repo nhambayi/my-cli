@@ -15,23 +15,24 @@ export class TemplateStore implements ITemplateStore {
     configuration: IApplicationConfiguration;
     logger: ILogger;
 
-    initialize(): void {
-
-        if (!this.fileStore.fileExists(this.configuration.templateRootFolder)) {
-            this.createRootFolder((err) => {
-                if (!this.fileStore.fileExists(`${this.configuration.templateRootFolder}/${INDEX_FILE_NAME}`)) {
-                    this.initiializeTemplateIndex((err) => {
-                        this.load();
-                    });
-                }
-            });
-        } else {
-            if (!this.fileStore.fileExists(`${this.configuration.templateRootFolder}/${INDEX_FILE_NAME}`)) {
-                this.initiializeTemplateIndex((err) => {
-                    this.load();
+    async initialize() {
+        return new Promise<void>((resolve, reject) => {
+            if (!this.fileStore.fileExists(this.configuration.templateRootFolder)) {
+                this.createRootFolder().then(() => {
+                    if (!this.fileStore.fileExists(`${this.configuration.templateRootFolder}/${INDEX_FILE_NAME}`)) {
+                        this.initiializeTemplateIndex().then(() => {
+                            resolve();
+                        });
+                    }
                 });
             }
-        }
+
+            if (!this.fileStore.fileExists(`${this.configuration.templateRootFolder}/${INDEX_FILE_NAME}`)) {
+                this.initiializeTemplateIndex().then(() => {
+                    resolve();
+                });
+            }
+        });
     }
 
     add(): void {
@@ -54,26 +55,40 @@ export class TemplateStore implements ITemplateStore {
 
     }
 
-    private load(): void {
-        this.fileStore.loadFile(this.configuration.templateIndexPath, (result, err) => {
-            if (err) {
-                this.logger.error(err);
-                return;
-            }
+    private async load(): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            this.fileStore.loadFile(this.configuration.templateIndexPath, (result, err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
         });
     }
 
-
-    private createRootFolder(callback: (err) => void): void {
-        this.fileStore.createFolder(this.configuration.templateRootFolder, (result, err) => {
-            callback(err);
+    private async createRootFolder() {
+        return new Promise<void>((resolve, reject) => {
+            this.fileStore.createFolder(this.configuration.templateRootFolder, (result, err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
         });
     }
 
-    private initiializeTemplateIndex(callback: (err) => void): void {
-        let template: string = "";
-        this.fileStore.saveFile(this.configuration.templateIndexPath, template, (result, err) => {
-            callback(err);
+    private async initiializeTemplateIndex() {
+        return new Promise<void>((resolve, reject) => {
+            let template: string = "";
+            this.fileStore.saveFile(this.configuration.templateIndexPath, template, (result, err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
         });
     }
 }

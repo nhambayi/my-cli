@@ -63,64 +63,95 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Constants_1 = __webpack_require__(59);
-	var TemplateStore = (function () {
-	    function TemplateStore(config, fileStore, logger) {
+	var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+	    return new (P || (P = Promise))(function (resolve, reject) {
+	        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+	        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+	        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+	        step((generator = generator.apply(thisArg, _arguments)).next());
+	    });
+	};
+	const Constants_1 = __webpack_require__(59);
+	class TemplateStore {
+	    constructor(config, fileStore, logger) {
 	        this.configuration = config;
 	        this.fileStore = fileStore;
 	        this.logger = logger;
 	    }
-	    TemplateStore.prototype.initialize = function () {
-	        var _this = this;
-	        if (!this.fileStore.fileExists(this.configuration.templateRootFolder)) {
-	            this.createRootFolder(function (err) {
-	                if (!_this.fileStore.fileExists(_this.configuration.templateRootFolder + "/" + Constants_1.INDEX_FILE_NAME)) {
-	                    _this.initiializeTemplateIndex(function (err) {
-	                        _this.load();
+	    initialize() {
+	        return __awaiter(this, void 0, void 0, function* () {
+	            return new Promise((resolve, reject) => {
+	                if (!this.fileStore.fileExists(this.configuration.templateRootFolder)) {
+	                    this.createRootFolder().then(() => {
+	                        if (!this.fileStore.fileExists(`${this.configuration.templateRootFolder}/${Constants_1.INDEX_FILE_NAME}`)) {
+	                            this.initiializeTemplateIndex().then(() => {
+	                                resolve();
+	                            });
+	                        }
+	                    });
+	                }
+	                if (!this.fileStore.fileExists(`${this.configuration.templateRootFolder}/${Constants_1.INDEX_FILE_NAME}`)) {
+	                    this.initiializeTemplateIndex().then(() => {
+	                        resolve();
 	                    });
 	                }
 	            });
-	        }
-	        else {
-	            if (!this.fileStore.fileExists(this.configuration.templateRootFolder + "/" + Constants_1.INDEX_FILE_NAME)) {
-	                this.initiializeTemplateIndex(function (err) {
-	                    _this.load();
+	        });
+	    }
+	    add() {
+	    }
+	    update() {
+	    }
+	    remove() {
+	    }
+	    find() {
+	    }
+	    getAll() {
+	    }
+	    load() {
+	        return __awaiter(this, void 0, void 0, function* () {
+	            return new Promise((resolve, reject) => {
+	                this.fileStore.loadFile(this.configuration.templateIndexPath, (result, err) => {
+	                    if (err) {
+	                        reject(err);
+	                    }
+	                    else {
+	                        resolve(result);
+	                    }
 	                });
-	            }
-	        }
-	    };
-	    TemplateStore.prototype.add = function () {
-	    };
-	    TemplateStore.prototype.update = function () {
-	    };
-	    TemplateStore.prototype.remove = function () {
-	    };
-	    TemplateStore.prototype.find = function () {
-	    };
-	    TemplateStore.prototype.getAll = function () {
-	    };
-	    TemplateStore.prototype.load = function () {
-	        var _this = this;
-	        this.fileStore.loadFile(this.configuration.templateIndexPath, function (result, err) {
-	            if (err) {
-	                _this.logger.error(err);
-	                return;
-	            }
+	            });
 	        });
-	    };
-	    TemplateStore.prototype.createRootFolder = function (callback) {
-	        this.fileStore.createFolder(this.configuration.templateRootFolder, function (result, err) {
-	            callback(err);
+	    }
+	    createRootFolder() {
+	        return __awaiter(this, void 0, void 0, function* () {
+	            return new Promise((resolve, reject) => {
+	                this.fileStore.createFolder(this.configuration.templateRootFolder, (result, err) => {
+	                    if (err) {
+	                        reject(err);
+	                    }
+	                    else {
+	                        resolve();
+	                    }
+	                });
+	            });
 	        });
-	    };
-	    TemplateStore.prototype.initiializeTemplateIndex = function (callback) {
-	        var template = "";
-	        this.fileStore.saveFile(this.configuration.templateIndexPath, template, function (result, err) {
-	            callback(err);
+	    }
+	    initiializeTemplateIndex() {
+	        return __awaiter(this, void 0, void 0, function* () {
+	            return new Promise((resolve, reject) => {
+	                let template = "";
+	                this.fileStore.saveFile(this.configuration.templateIndexPath, template, (result, err) => {
+	                    if (err) {
+	                        reject(err);
+	                    }
+	                    else {
+	                        resolve();
+	                    }
+	                });
+	            });
 	        });
-	    };
-	    return TemplateStore;
-	}());
+	    }
+	}
 	exports.TemplateStore = TemplateStore;
 
 
@@ -139,34 +170,31 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var fs = __webpack_require__(1);
-	var FileStore = (function () {
-	    function FileStore() {
-	    }
-	    FileStore.prototype.loadFile = function (path, callback) {
-	        fs.readFile(path, "utf8", function (data, err) {
+	const fs = __webpack_require__(1);
+	class FileStore {
+	    loadFile(path, callback) {
+	        fs.readFile(path, "utf8", (data, err) => {
 	            callback(err, data);
 	        });
-	    };
-	    FileStore.prototype.saveFile = function (path, content, callback) {
-	        fs.watchFile(path, content, function (err) {
+	    }
+	    saveFile(path, content, callback) {
+	        fs.watchFile(path, content, (err) => {
 	            callback(false, err);
 	        });
-	    };
-	    FileStore.prototype.createFolder = function (path, callback) {
-	        fs.mkdir(path, function (err) {
+	    }
+	    createFolder(path, callback) {
+	        fs.mkdir(path, (err) => {
 	            callback(false, err);
 	        });
-	    };
-	    FileStore.prototype.deleteFile = function (path, callback) {
+	    }
+	    deleteFile(path, callback) {
 	        callback(false, "not implemented");
-	    };
-	    FileStore.prototype.fileExists = function (path) {
-	        var exists = fs.existsSync(path);
+	    }
+	    fileExists(path) {
+	        let exists = fs.existsSync(path);
 	        return exists;
-	    };
-	    return FileStore;
-	}());
+	    }
+	}
 	exports.FileStore = FileStore;
 
 
@@ -176,21 +204,18 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var chalk = __webpack_require__(63);
-	var Logger = (function () {
-	    function Logger() {
-	    }
-	    Logger.prototype.log = function (message) {
+	const chalk = __webpack_require__(63);
+	class Logger {
+	    log(message) {
 	        console.log(message);
-	    };
-	    Logger.prototype.warn = function (message) {
+	    }
+	    warn(message) {
 	        console.log(chalk.yellow(message));
-	    };
-	    Logger.prototype.error = function (message) {
+	    }
+	    error(message) {
 	        console.log(chalk.red(message));
-	    };
-	    return Logger;
-	}());
+	    }
+	}
 	exports.Logger = Logger;
 
 
@@ -530,65 +555,62 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var TemplateStore_1 = __webpack_require__(58);
-	var FileStore_1 = __webpack_require__(61);
-	var Logger_1 = __webpack_require__(62);
-	var Constants_1 = __webpack_require__(59);
-	var TypeMoq = __webpack_require__(73);
-	describe("Template Store", function () {
-	    var config = {
+	const TemplateStore_1 = __webpack_require__(58);
+	const FileStore_1 = __webpack_require__(61);
+	const Logger_1 = __webpack_require__(62);
+	const Constants_1 = __webpack_require__(59);
+	const TypeMoq = __webpack_require__(73);
+	describe("Template Store", () => {
+	    const config = {
 	        templateRootFolder: "root",
 	        templateIndexPath: "root/index.json"
 	    };
-	    var fileStore = new FileStore_1.FileStore();
-	    var fileStoreMock = TypeMoq.Mock.ofInstance(fileStore);
-	    var store;
-	    var loggerMock = TypeMoq.Mock.ofType(Logger_1.Logger);
+	    let fileStore = new FileStore_1.FileStore();
+	    const fileStoreMock = TypeMoq.Mock.ofInstance(fileStore);
+	    let store;
+	    const loggerMock = TypeMoq.Mock.ofType(Logger_1.Logger);
 	    beforeEach(function () {
 	    });
-	    describe("#initialization", function () {
+	    describe("#initialization", () => {
 	        beforeEach(function () {
 	            fileStoreMock.reset();
 	            store = new TemplateStore_1.TemplateStore(config, fileStoreMock.object, loggerMock.object);
 	        });
-	        it("Should check if the template folder in config exists", function () {
-	            fileStoreMock.setup(function (x) { return x.fileExists(TypeMoq.It.isAnyString()); })
-	                .returns(function () { return true; });
-	            store.initialize();
-	            fileStoreMock.verify(function (x) { return x.fileExists(TypeMoq.It.isValue(config.templateRootFolder)); }, TypeMoq.Times.atLeastOnce());
-	            fileStoreMock.verify(function (x) { return x.fileExists(TypeMoq.It.isValue(config.templateRootFolder + "/" + Constants_1.INDEX_FILE_NAME)); }, TypeMoq.Times.atLeastOnce());
+	        it("Should check if the template folder in config exists", () => {
+	            fileStoreMock.setup(x => x.fileExists(TypeMoq.It.isAnyString()))
+	                .returns(() => true);
+	            store.initialize().then(() => {
+	                fileStoreMock.verify(x => x.fileExists(TypeMoq.It.isValue(config.templateRootFolder)), TypeMoq.Times.atLeastOnce());
+	                fileStoreMock.verify(x => x.fileExists(TypeMoq.It.isValue(`${config.templateRootFolder}/${Constants_1.INDEX_FILE_NAME}`)), TypeMoq.Times.atLeastOnce());
+	            });
 	        });
-	        it("Should create template folder if it does not exist", function () {
-	            fileStoreMock.setup(function (x) { return x.fileExists(TypeMoq.It.isAnyString()); })
-	                .returns(function () { return false; });
-	            store.initialize();
-	            fileStoreMock.verify(function (x) {
-	                return x.createFolder(TypeMoq.It.isValue(config.templateRootFolder), TypeMoq.It.isAny());
-	            }, TypeMoq.Times.atLeastOnce());
+	        it("Should create template folder if it does not exist", () => {
+	            fileStoreMock.setup(x => x.fileExists(TypeMoq.It.isAnyString()))
+	                .returns(() => false);
+	            store.initialize().then(() => {
+	                fileStoreMock.verify(x => x.createFolder(TypeMoq.It.isValue(config.templateRootFolder), TypeMoq.It.isAny()), TypeMoq.Times.atLeastOnce());
+	            });
 	        });
-	        it("Should create template index file if it does not exist", function () {
-	            fileStoreMock.setup(function (x) { return x.fileExists(TypeMoq.It.isAnyString()); })
-	                .returns(function () { return false; });
-	            store.initialize();
-	            fileStoreMock.verify(function (x) {
-	                return x.saveFile(TypeMoq.It.isValue(config.templateIndexPath), TypeMoq.It.isAnyString(), TypeMoq.It.isAny());
-	            }, TypeMoq.Times.atLeastOnce());
+	        it("Should create template index file if it does not exist", () => {
+	            fileStoreMock.setup(x => x.fileExists(TypeMoq.It.isAnyString()))
+	                .returns(() => false);
+	            store.initialize().then(() => {
+	                fileStoreMock.verify(x => x.saveFile(TypeMoq.It.isValue(config.templateIndexPath), TypeMoq.It.isAnyString(), TypeMoq.It.isAny()), TypeMoq.Times.atLeastOnce());
+	            });
 	        });
-	        it("Should try and load template index file", function () {
-	            fileStoreMock.setup(function (x) { return x.fileExists(TypeMoq.It.isAnyString()); })
-	                .returns(function () { return true; });
-	            store.initialize();
-	            fileStoreMock.verify(function (x) {
-	                return x.loadFile(TypeMoq.It.isValue(config.templateIndexPath), TypeMoq.It.isAny());
-	            }, TypeMoq.Times.atLeastOnce());
+	        it("Should try and load template index file", () => {
+	            fileStoreMock.setup(x => x.fileExists(TypeMoq.It.isAnyString()))
+	                .returns(() => true);
+	            store.initialize().then(() => {
+	                fileStoreMock.verify(x => x.loadFile(TypeMoq.It.isValue(config.templateIndexPath), TypeMoq.It.isAny()), TypeMoq.Times.atLeastOnce());
+	            });
 	        });
-	        it("Should try and load template index file eben if it did not exist", function () {
-	            fileStoreMock.setup(function (x) { return x.fileExists(TypeMoq.It.isAnyString()); })
-	                .returns(function () { return false; });
-	            store.initialize();
-	            fileStoreMock.verify(function (x) {
-	                return x.loadFile(TypeMoq.It.isValue(config.templateIndexPath), TypeMoq.It.isAny());
-	            }, TypeMoq.Times.atLeastOnce());
+	        it("Should try and load template index file eben if it did not exist", () => {
+	            fileStoreMock.setup(x => x.fileExists(TypeMoq.It.isAnyString()))
+	                .returns(() => false);
+	            store.initialize().then(() => {
+	                fileStoreMock.verify(x => x.loadFile(TypeMoq.It.isValue(config.templateIndexPath), TypeMoq.It.isAny()), TypeMoq.Times.atLeastOnce());
+	            });
 	        });
 	    });
 	});

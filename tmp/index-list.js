@@ -46,17 +46,17 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var TemplateStore_1 = __webpack_require__(58);
-	var TemplateStoreConfiguration_1 = __webpack_require__(60);
-	var FileStore_1 = __webpack_require__(61);
-	var Logger_1 = __webpack_require__(62);
+	const TemplateStore_1 = __webpack_require__(58);
+	const TemplateStoreConfiguration_1 = __webpack_require__(60);
+	const FileStore_1 = __webpack_require__(61);
+	const Logger_1 = __webpack_require__(62);
 	console.log("Listing...");
-	var config = new TemplateStoreConfiguration_1.TemplateStoreConfiguration();
+	const config = new TemplateStoreConfiguration_1.TemplateStoreConfiguration();
 	config.templateRootFolder = "root";
 	config.templateIndexPath = "root/index.json";
-	var fileStore = new FileStore_1.FileStore();
-	var logger = new Logger_1.Logger();
-	var store = new TemplateStore_1.TemplateStore(config, fileStore, logger);
+	const fileStore = new FileStore_1.FileStore();
+	const logger = new Logger_1.Logger();
+	const store = new TemplateStore_1.TemplateStore(config, fileStore, logger);
 	store.initialize();
 
 
@@ -73,64 +73,95 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Constants_1 = __webpack_require__(59);
-	var TemplateStore = (function () {
-	    function TemplateStore(config, fileStore, logger) {
+	var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+	    return new (P || (P = Promise))(function (resolve, reject) {
+	        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+	        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+	        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+	        step((generator = generator.apply(thisArg, _arguments)).next());
+	    });
+	};
+	const Constants_1 = __webpack_require__(59);
+	class TemplateStore {
+	    constructor(config, fileStore, logger) {
 	        this.configuration = config;
 	        this.fileStore = fileStore;
 	        this.logger = logger;
 	    }
-	    TemplateStore.prototype.initialize = function () {
-	        var _this = this;
-	        if (!this.fileStore.fileExists(this.configuration.templateRootFolder)) {
-	            this.createRootFolder(function (err) {
-	                if (!_this.fileStore.fileExists(_this.configuration.templateRootFolder + "/" + Constants_1.INDEX_FILE_NAME)) {
-	                    _this.initiializeTemplateIndex(function (err) {
-	                        _this.load();
+	    initialize() {
+	        return __awaiter(this, void 0, void 0, function* () {
+	            return new Promise((resolve, reject) => {
+	                if (!this.fileStore.fileExists(this.configuration.templateRootFolder)) {
+	                    this.createRootFolder().then(() => {
+	                        if (!this.fileStore.fileExists(`${this.configuration.templateRootFolder}/${Constants_1.INDEX_FILE_NAME}`)) {
+	                            this.initiializeTemplateIndex().then(() => {
+	                                resolve();
+	                            });
+	                        }
+	                    });
+	                }
+	                if (!this.fileStore.fileExists(`${this.configuration.templateRootFolder}/${Constants_1.INDEX_FILE_NAME}`)) {
+	                    this.initiializeTemplateIndex().then(() => {
+	                        resolve();
 	                    });
 	                }
 	            });
-	        }
-	        else {
-	            if (!this.fileStore.fileExists(this.configuration.templateRootFolder + "/" + Constants_1.INDEX_FILE_NAME)) {
-	                this.initiializeTemplateIndex(function (err) {
-	                    _this.load();
+	        });
+	    }
+	    add() {
+	    }
+	    update() {
+	    }
+	    remove() {
+	    }
+	    find() {
+	    }
+	    getAll() {
+	    }
+	    load() {
+	        return __awaiter(this, void 0, void 0, function* () {
+	            return new Promise((resolve, reject) => {
+	                this.fileStore.loadFile(this.configuration.templateIndexPath, (result, err) => {
+	                    if (err) {
+	                        reject(err);
+	                    }
+	                    else {
+	                        resolve(result);
+	                    }
 	                });
-	            }
-	        }
-	    };
-	    TemplateStore.prototype.add = function () {
-	    };
-	    TemplateStore.prototype.update = function () {
-	    };
-	    TemplateStore.prototype.remove = function () {
-	    };
-	    TemplateStore.prototype.find = function () {
-	    };
-	    TemplateStore.prototype.getAll = function () {
-	    };
-	    TemplateStore.prototype.load = function () {
-	        var _this = this;
-	        this.fileStore.loadFile(this.configuration.templateIndexPath, function (result, err) {
-	            if (err) {
-	                _this.logger.error(err);
-	                return;
-	            }
+	            });
 	        });
-	    };
-	    TemplateStore.prototype.createRootFolder = function (callback) {
-	        this.fileStore.createFolder(this.configuration.templateRootFolder, function (result, err) {
-	            callback(err);
+	    }
+	    createRootFolder() {
+	        return __awaiter(this, void 0, void 0, function* () {
+	            return new Promise((resolve, reject) => {
+	                this.fileStore.createFolder(this.configuration.templateRootFolder, (result, err) => {
+	                    if (err) {
+	                        reject(err);
+	                    }
+	                    else {
+	                        resolve();
+	                    }
+	                });
+	            });
 	        });
-	    };
-	    TemplateStore.prototype.initiializeTemplateIndex = function (callback) {
-	        var template = "";
-	        this.fileStore.saveFile(this.configuration.templateIndexPath, template, function (result, err) {
-	            callback(err);
+	    }
+	    initiializeTemplateIndex() {
+	        return __awaiter(this, void 0, void 0, function* () {
+	            return new Promise((resolve, reject) => {
+	                let template = "";
+	                this.fileStore.saveFile(this.configuration.templateIndexPath, template, (result, err) => {
+	                    if (err) {
+	                        reject(err);
+	                    }
+	                    else {
+	                        resolve();
+	                    }
+	                });
+	            });
 	        });
-	    };
-	    return TemplateStore;
-	}());
+	    }
+	}
 	exports.TemplateStore = TemplateStore;
 
 
@@ -149,11 +180,8 @@
 /***/ function(module, exports) {
 
 	"use strict";
-	var TemplateStoreConfiguration = (function () {
-	    function TemplateStoreConfiguration() {
-	    }
-	    return TemplateStoreConfiguration;
-	}());
+	class TemplateStoreConfiguration {
+	}
 	exports.TemplateStoreConfiguration = TemplateStoreConfiguration;
 
 
@@ -163,34 +191,31 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var fs = __webpack_require__(1);
-	var FileStore = (function () {
-	    function FileStore() {
-	    }
-	    FileStore.prototype.loadFile = function (path, callback) {
-	        fs.readFile(path, "utf8", function (data, err) {
+	const fs = __webpack_require__(1);
+	class FileStore {
+	    loadFile(path, callback) {
+	        fs.readFile(path, "utf8", (data, err) => {
 	            callback(err, data);
 	        });
-	    };
-	    FileStore.prototype.saveFile = function (path, content, callback) {
-	        fs.watchFile(path, content, function (err) {
+	    }
+	    saveFile(path, content, callback) {
+	        fs.watchFile(path, content, (err) => {
 	            callback(false, err);
 	        });
-	    };
-	    FileStore.prototype.createFolder = function (path, callback) {
-	        fs.mkdir(path, function (err) {
+	    }
+	    createFolder(path, callback) {
+	        fs.mkdir(path, (err) => {
 	            callback(false, err);
 	        });
-	    };
-	    FileStore.prototype.deleteFile = function (path, callback) {
+	    }
+	    deleteFile(path, callback) {
 	        callback(false, "not implemented");
-	    };
-	    FileStore.prototype.fileExists = function (path) {
-	        var exists = fs.existsSync(path);
+	    }
+	    fileExists(path) {
+	        let exists = fs.existsSync(path);
 	        return exists;
-	    };
-	    return FileStore;
-	}());
+	    }
+	}
 	exports.FileStore = FileStore;
 
 
@@ -200,21 +225,18 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var chalk = __webpack_require__(63);
-	var Logger = (function () {
-	    function Logger() {
-	    }
-	    Logger.prototype.log = function (message) {
+	const chalk = __webpack_require__(63);
+	class Logger {
+	    log(message) {
 	        console.log(message);
-	    };
-	    Logger.prototype.warn = function (message) {
+	    }
+	    warn(message) {
 	        console.log(chalk.yellow(message));
-	    };
-	    Logger.prototype.error = function (message) {
+	    }
+	    error(message) {
 	        console.log(chalk.red(message));
-	    };
-	    return Logger;
-	}());
+	    }
+	}
 	exports.Logger = Logger;
 
 
