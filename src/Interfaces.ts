@@ -5,22 +5,28 @@ export interface ITemplateIndex {
 
 export interface ITemplateStore {
     initialize(): void;
-    load(): void;
     add(): void;
     update(): void;
     remove(): void;
     find(name: string, project: string): void;
+    getAll(): void;
 }
 
 export interface IFileStore {
-    loadFile(path: string): void;
-    saveFile(path: string): void;
-    createFolder(path: string): void;
-    deleteFile(path: string): void;
+    loadFile(path: string, callback: (data: string, err: any) => void): void;
+    saveFile(path: string, content: string, callback: (success: boolean, err: any) => void): void;
+    createFolder(path: string, callback: (success: boolean, err: any) => void): void;
+    deleteFile(path: string, callback: (success: boolean, err: any) => void): void;
     fileExists(path: string): boolean;
 }
 
 export interface IApplicationConfiguration {
     templateRootFolder: string;
     templateIndexPath: string;
+}
+
+export interface ILogger {
+    log(message: string): void;
+    warn(message: string): void;
+    error(message: string): void;
 }

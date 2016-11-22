@@ -1,31 +1,88 @@
-import {} from "../TemplateStore";
+import { TemplateStore } from "../TemplateStore";
+import { FileStore } from "../FileStore";
+import {IFileStore, ILogger} from "../Interfaces";
+import {Logger} from "../Logger";
+import { INDEX_FILE_NAME } from "../Constants";
+import * as TypeMoq from "typemoq";
 
 describe("Template Store", () => {
-    let subject: string;
+
+    const config = {
+        templateRootFolder: "root",
+        templateIndexPath: "root/index.json"
+    };
+
+    let fileStore = new FileStore();
+    const fileStoreMock = TypeMoq.Mock.ofInstance(fileStore);
+    let store: TemplateStore;
+    const loggerMock = TypeMoq.Mock.ofType(Logger);
+
 
     beforeEach(function () {
-        subject = "Hello Mocha";
+
     });
 
     describe("#initialization", () => {
-        it("should say Hello Mocha", () => {
-
-            if (subject !== "Hello Mocha") {
-                throw new Error("Not Mocha");
-            }
+        beforeEach(function () {
+            fileStoreMock.reset();
+            store = new TemplateStore(config, fileStoreMock.object, loggerMock.object);
         });
 
-        it("should be true", () => {
+        it("Should check if the template folder in config exists", () => {
+            fileStoreMock.setup( x => x.fileExists(TypeMoq.It.isAnyString()))
+                .returns(() => true);
 
-            if (subject !== "Hello Mocha") {
-                throw new Error("Not Mocha");
-            }
+            store.initialize();
+
+            fileStoreMock.verify(x => x.fileExists(TypeMoq.It.isValue(config.templateRootFolder)),
+                TypeMoq.Times.atLeastOnce());
+
+            fileStoreMock.verify(x => x.fileExists(TypeMoq.It.isValue(`${config.templateRootFolder}/${INDEX_FILE_NAME}`)),
+                TypeMoq.Times.atLeastOnce());
         });
 
-        it("should be not fail", () => {
-            if (subject !== "Hello Mocha") {
-                throw new Error("Not Mocha");
-            }
+        it("Should create template folder if it does not exist", () => {
+            fileStoreMock.setup( x => x.fileExists(TypeMoq.It.isAnyString()))
+                .returns(() => false);
+            store.initialize();
+
+            fileStoreMock.verify( x =>
+                x.createFolder(TypeMoq.It.isValue(config.templateRootFolder), TypeMoq.It.isAny()),
+                    TypeMoq.Times.atLeastOnce() );
+
+        });
+
+        it("Should create template index file if it does not exist", () => {
+            fileStoreMock.setup( x => x.fileExists(TypeMoq.It.isAnyString()))
+                .returns(() => false);
+            store.initialize();
+
+            fileStoreMock.verify( x =>
+                x.saveFile(TypeMoq.It.isValue(config.templateIndexPath), TypeMoq.It.isAnyString(), TypeMoq.It.isAny()),
+                    TypeMoq.Times.atLeastOnce() );
+
+        });
+
+        it("Should try and load template index file", () => {
+            fileStoreMock.setup( x => x.fileExists(TypeMoq.It.isAnyString()))
+                .returns(() => true);
+            store.initialize();
+
+            fileStoreMock.verify( x =>
+                x.loadFile(TypeMoq.It.isValue(config.templateIndexPath), TypeMoq.It.isAny()),
+                    TypeMoq.Times.atLeastOnce() );
+
+        });
+
+        it("Should try and load template index file eben if it did not exist", () => {
+            fileStoreMock.setup( x => x.fileExists(TypeMoq.It.isAnyString()))
+                .returns(() => false);
+            store.initialize();
+
+            fileStoreMock.verify( x =>
+                x.loadFile(TypeMoq.It.isValue(config.templateIndexPath), TypeMoq.It.isAny()),
+                    TypeMoq.Times.atLeastOnce() );
+
         });
     });
 });

@@ -22,6 +22,9 @@
     },
     "mocha/mocha.d.ts": {
       "commit": "55978642a28584b258e511046b9fb9d09c8a80a4"
+    },
+    "chalk/chalk.d.ts": {
+      "commit": "d94c20f85ad3c8ac2516ea4a303b51d428ad4c9c"
     }
   }
 }
