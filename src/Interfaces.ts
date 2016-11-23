@@ -4,7 +4,7 @@ export interface ITemplateIndex {
 }
 
 export interface ITemplateStore {
-    initialize(): void;
+    initialize(): Promise<void>;
     add(): void;
     update(): void;
     remove(): void;

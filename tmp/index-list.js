@@ -52,12 +52,24 @@
 	const Logger_1 = __webpack_require__(62);
 	console.log("Listing...");
 	const config = new TemplateStoreConfiguration_1.TemplateStoreConfiguration();
-	config.templateRootFolder = "root";
-	config.templateIndexPath = "root/index.json";
 	const fileStore = new FileStore_1.FileStore();
 	const logger = new Logger_1.Logger();
 	const store = new TemplateStore_1.TemplateStore(config, fileStore, logger);
-	store.initialize();
+	const command = new ListCommand(store);
+	command.execute();
+	class ListCommand {
+	    constructor(store) {
+	        this.store = store;
+	    }
+	    execute() {
+	        this.store.initialize()
+	            .then(this.listItems);
+	    }
+	    listItems() {
+	        console.log("listing...");
+	    }
+	}
+	exports.ListCommand = ListCommand;
 
 
 /***/ },
@@ -181,6 +193,14 @@
 
 	"use strict";
 	class TemplateStoreConfiguration {
+	    constructor() {
+	        this.userHomeDirectory = this.getUserHome();
+	        this.templateRootFolder = `${this.userHomeDirectory}/.my-templates/`;
+	        this.templateIndexPath = `${this.templateRootFolder}/.template-index.json`;
+	    }
+	    getUserHome() {
+	        return process.env.HOME || process.env.USERPROFILE;
+	    }
 	}
 	exports.TemplateStoreConfiguration = TemplateStoreConfiguration;
 
