@@ -1,7 +1,7 @@
 import * as fs from "fs";
-import { SerializationHelper } from "../SerializationHelper";
-import { Template } from "../Template";
-import { TemplateDatabase } from "../TemplateDatabase";
+import { SerializationHelper } from "../../SerializationHelper";
+import { Template } from "../../Template";
+import { TemplateDatabase } from "../../TemplateDatabase";
 const crypto = require("crypto");
 
 console.log("Creating...");
@@ -33,7 +33,7 @@ class CreateCommand {
 
                 if (templates.length === 0) {
                     let template = new Template();
-                    template.filename = token;
+                    template.name = token;
                     template.id = commandArgs.templateName;
                     db.templates.push(template);
 

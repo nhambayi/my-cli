@@ -4,7 +4,8 @@ module.exports = {
     index: "./src/Index.ts",
     list : "./src/commands/List/List",
     edit : "./src/commands/EditCommand",
-    create : "./src/commands/CreateCommand",
+    add : "./src/commands/Add/Add",
+    create : "./src/commands/create/CreateCommand",
     tests: "./src/Tests/IndexTest.ts"
   },
   output: {

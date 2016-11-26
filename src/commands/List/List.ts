@@ -5,14 +5,14 @@ import { TemplateStoreConfiguration } from "../../TemplateStoreConfiguration";
 import { FileStore } from "../../FileStore";
 import { Logger } from "../../Logger";
 import {ListCommand} from "./ListCommand";
-
-console.log("Listing...");
+import {DiskDbTemplateIndex} from "../../DiskDbTemplateIndex";
+import {TEMPLATES_COLLECTION_NAME} from "../../Constants";
 
 const config = new TemplateStoreConfiguration();
 const fileStore = new FileStore();
 const logger = new Logger();
-const store = new TemplateStore(config, fileStore, logger);
+const templateIndex = new DiskDbTemplateIndex(config.templateIndexPath, TEMPLATES_COLLECTION_NAME);
+const store = new TemplateStore(templateIndex, config, fileStore, logger);
 const command = new ListCommand(store);
 
-command.execute();
-
+ command.execute();

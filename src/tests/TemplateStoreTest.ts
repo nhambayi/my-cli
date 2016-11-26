@@ -1,6 +1,7 @@
 import { TemplateStore } from "../TemplateStore";
 import { FileStore } from "../FileStore";
-import { IFileStore, ILogger } from "../Interfaces";
+import { IFileStore, ILogger, ITemplateIndex } from "../Interfaces";
+import {DiskDbTemplateIndex} from "../DiskDbTemplateIndex";
 import { Logger } from "../Logger";
 import { INDEX_FOLDER_NAME } from "../Constants";
 import * as TypeMoq from "typemoq";
@@ -16,6 +17,7 @@ describe("Template Store", () => {
     const fileStoreMock = TypeMoq.Mock.ofInstance(fileStore);
     let store: TemplateStore;
     const loggerMock = TypeMoq.Mock.ofType(Logger);
+    const indexMock = TypeMoq.Mock.ofType(DiskDbTemplateIndex);
 
 
     beforeEach(function () {
@@ -26,7 +28,7 @@ describe("Template Store", () => {
 
         beforeEach(function () {
             fileStoreMock.reset();
-            store = new TemplateStore(config, fileStoreMock.object, loggerMock.object);
+            store = new TemplateStore(indexMock.object, config, fileStoreMock.object, loggerMock.object);
         });
 
         it("Should check if the template folder in config exists", () => {

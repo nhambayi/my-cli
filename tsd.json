@@ -25,6 +25,9 @@
     },
     "chalk/chalk.d.ts": {
       "commit": "d94c20f85ad3c8ac2516ea4a303b51d428ad4c9c"
+    },
+    "easy-table/easy-table.d.ts": {
+      "commit": "e4717461e4c3ce9e71f517074108f089604a2503"
     }
   }
 }

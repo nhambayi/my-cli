@@ -45,19 +45,20 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var minimist = __webpack_require__(1);
-	var fs = __webpack_require__(2);
-	var Template_1 = __webpack_require__(3);
-	var TemplateDatabase_1 = __webpack_require__(4);
-	var SerializationHelper_1 = __webpack_require__(5);
-	var handlebars_1 = __webpack_require__(6);
-	var program = __webpack_require__(36);
-	var openInEditor = __webpack_require__(41);
-	var crypto = __webpack_require__(57);
+	const minimist = __webpack_require__(4);
+	const fs = __webpack_require__(2);
+	const Template_1 = __webpack_require__(5);
+	const TemplateDatabase_1 = __webpack_require__(6);
+	const SerializationHelper_1 = __webpack_require__(7);
+	const handlebars_1 = __webpack_require__(8);
+	const program = __webpack_require__(38);
+	const openInEditor = __webpack_require__(43);
+	const crypto = __webpack_require__(3);
 	console.log("Welcome to TBD");
 	program
 	    .version("0.10.0")
 	    .command("create [name]", "create a new template")
+	    .command("add [name]", "add a new template")
 	    .command("list", "list all templates", { isDefault: true })
 	    .option("-t, --template", "template")
 	    .option("-o, --output", "output filename")
@@ -67,24 +68,24 @@
 	function getUserHome() {
 	    return process.env.HOME || process.env.USERPROFILE;
 	}
-	var homeFolder = getUserHome();
-	var parserOptions = {
+	const homeFolder = getUserHome();
+	let parserOptions = {
 	    default: {
 	        "new": false,
 	        alias: { h: "help", v: "version" },
-	        "templateFolder": homeFolder + "/.my-templates/"
+	        "templateFolder": `${homeFolder}/.my-templates/`
 	    }
 	};
-	var args = minimist(process.argv.slice(2), parserOptions);
+	const args = minimist(process.argv.slice(2), parserOptions);
 	if (args["verbose"]) {
 	    console.log(args);
 	}
-	var exists = fs.existsSync(args["templateFolder"]);
+	let exists = fs.existsSync(args["templateFolder"]);
 	if (exists === false) {
 	    console.log("Initializing template db...");
 	    fs.mkdir(args["templateFolder"]);
-	    fs.mkdir(args["templateFolder"] + "/templates");
-	    var db = new TemplateDatabase_1.TemplateDatabase();
+	    fs.mkdir(`${args["templateFolder"]}/templates`);
+	    let db = new TemplateDatabase_1.TemplateDatabase();
 	    db.templates = new Array();
 	    fs.writeFile(args["templateFolder"] + "/.template-index.json", JSON.stringify(db), function (err) {
 	        if (err) {
@@ -97,28 +98,27 @@
 	        if (err) {
 	            return console.log(err);
 	        }
-	        var db = SerializationHelper_1.SerializationHelper.toInstance(new TemplateDatabase_1.TemplateDatabase(), data);
+	        let db = SerializationHelper_1.SerializationHelper.toInstance(new TemplateDatabase_1.TemplateDatabase(), data);
 	        console.log("NAME\t\t\tFILENAME");
-	        for (var _i = 0, _a = db.templates; _i < _a.length; _i++) {
-	            var entry = _a[_i];
-	            console.log(entry.id + "\t\t" + entry.filename + "\t" + entry.extension);
+	        for (let entry of db.templates) {
+	            console.log(`${entry.id}\t\t${entry.name}\t${entry.extension}`);
 	        }
 	    });
 	}
 	if (args["new"] === true) {
 	    crypto.randomBytes(12, function (err, buffer) {
-	        var token = buffer.toString("hex");
+	        const token = buffer.toString("hex");
 	        fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function (err, data) {
 	            if (err) {
 	                return console.log(err);
 	            }
-	            var db = SerializationHelper_1.SerializationHelper.toInstance(new TemplateDatabase_1.TemplateDatabase(), data);
-	            var templates = db.templates.filter(function (item) { return item.id === args["name"]; });
+	            const db = SerializationHelper_1.SerializationHelper.toInstance(new TemplateDatabase_1.TemplateDatabase(), data);
+	            const templates = db.templates.filter(item => item.id === args["name"]);
 	            if (templates.length === 0) {
-	                var template_1 = new Template_1.Template();
-	                template_1.filename = token;
-	                template_1.id = args["name"];
-	                db.templates.push(template_1);
+	                let template = new Template_1.Template();
+	                template.name = token;
+	                template.id = args["name"];
+	                db.templates.push(template);
 	                fs.createReadStream(args["from"])
 	                    .pipe(fs.createWriteStream(args["templateFolder"] + "/templates/" + token));
 	                fs.writeFile(args["templateFolder"] + "/.template-index.json", JSON.stringify(db), function (err) {
@@ -138,27 +138,27 @@
 	        if (err) {
 	            return console.log(err);
 	        }
-	        var templateName = args["t"];
-	        var outputname = args["o"];
-	        var templateOptions = {
+	        let templateName = args["t"];
+	        let outputname = args["o"];
+	        let templateOptions = {
 	            outputname: outputname,
 	            extension: "tsx"
 	        };
-	        var db = SerializationHelper_1.SerializationHelper.toInstance(new TemplateDatabase_1.TemplateDatabase(), data);
-	        var templates = db.templates.filter(function (item) { return item.id === args["t"]; });
+	        const db = SerializationHelper_1.SerializationHelper.toInstance(new TemplateDatabase_1.TemplateDatabase(), data);
+	        let templates = db.templates.filter(item => item.id === args["t"]);
 	        if (templates.length === 0) {
-	            console.log("'" + args["t"] + "' template not found");
+	            console.log(`'${args["t"]}' template not found`);
 	        }
 	        else {
-	            var template_2 = templates[0];
-	            fs.readFile(args["templateFolder"] + "/templates/" + template_2.filename, "utf-8", function (err, templateText) {
+	            let template = templates[0];
+	            fs.readFile(`${args["templateFolder"]}/templates/${template.name}`, "utf-8", function (err, templateText) {
 	                if (err) {
 	                    console.log(err);
 	                    return;
 	                }
-	                var template = handlebars_1.compile(templateText);
-	                var output = template(templateOptions);
-	                fs.writeFile(outputname + ".ts", output, function (err) {
+	                let template = handlebars_1.compile(templateText);
+	                let output = template(templateOptions);
+	                fs.writeFile(`${outputname}.ts`, output, function (err) {
 	                    if (err) {
 	                        return console.log(err);
 	                    }
@@ -172,18 +172,18 @@
 	        if (err) {
 	            return console.log(err);
 	        }
-	        var db = SerializationHelper_1.SerializationHelper.toInstance(new TemplateDatabase_1.TemplateDatabase(), data);
-	        var templates = db.templates.filter(function (item) { return item.id === args["t"]; });
+	        const db = SerializationHelper_1.SerializationHelper.toInstance(new TemplateDatabase_1.TemplateDatabase(), data);
+	        let templates = db.templates.filter(item => item.id === args["t"]);
 	        if (templates.length === 0) {
-	            console.log("'" + args["t"] + "' template not found");
+	            console.log(`'${args["t"]}' template not found`);
 	        }
-	        var template = templates[0];
-	        var editor = openInEditor.configure({
+	        let template = templates[0];
+	        let editor = openInEditor.configure({
 	            editor: "code"
 	        }, function (err) {
 	            console.error("Something went wrong: " + err);
 	        });
-	        editor.open(args["templateFolder"] + "/templates/" + template.filename)
+	        editor.open(args["templateFolder"] + "/templates/" + template.name)
 	            .then(function () {
 	            console.log("Success!");
 	        }, function (err) {
@@ -199,7 +199,20 @@
 
 
 /***/ },
-/* 1 */
+/* 1 */,
+/* 2 */
+/***/ function(module, exports) {
+
+	module.exports = require("fs");
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	module.exports = require("crypto");
+
+/***/ },
+/* 4 */
 /***/ function(module, exports) {
 
 	module.exports = function (args, opts) {
@@ -441,64 +454,57 @@
 
 
 /***/ },
-/* 2 */
-/***/ function(module, exports) {
-
-	module.exports = require("fs");
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var Template = (function () {
-	    function Template() {
-	    }
-	    return Template;
-	}());
-	exports.Template = Template;
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var TemplateDatabase = (function () {
-	    function TemplateDatabase() {
-	    }
-	    return TemplateDatabase;
-	}());
-	exports.TemplateDatabase = TemplateDatabase;
-
-
-/***/ },
 /* 5 */
 /***/ function(module, exports) {
 
 	"use strict";
-	var SerializationHelper = (function () {
-	    function SerializationHelper() {
+	class Template {
+	    get id() {
+	        return this._id;
 	    }
-	    SerializationHelper.toInstance = function (obj, json) {
-	        var jsonObj = JSON.parse(json);
-	        if (typeof obj["fromJSON"] === "function") {
-	            obj["fromJSON"](jsonObj);
-	        }
-	        else {
-	            for (var propName in jsonObj) {
-	                obj[propName] = jsonObj[propName];
-	            }
-	        }
-	        return obj;
-	    };
-	    return SerializationHelper;
-	}());
-	exports.SerializationHelper = SerializationHelper;
+	    set id(value) {
+	        this._id = value;
+	    }
+	}
+	exports.Template = Template;
 
 
 /***/ },
 /* 6 */
+/***/ function(module, exports) {
+
+	"use strict";
+	class TemplateDatabase {
+	    initialize() {
+	    }
+	}
+	exports.TemplateDatabase = TemplateDatabase;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	"use strict";
+	class SerializationHelper {
+	    static toInstance(obj, json) {
+	        let jsonObj = JSON.parse(json);
+	        if (typeof obj["fromJSON"] === "function") {
+	            obj["fromJSON"](jsonObj);
+	        }
+	        else {
+	            for (let propName in jsonObj) {
+	                obj[propName] = jsonObj[propName];
+	            }
+	        }
+	        return obj;
+	    }
+	}
+	exports.SerializationHelper = SerializationHelper;
+
+
+/***/ },
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// USAGE:
@@ -507,9 +513,9 @@
 	
 	// var local = handlebars.create();
 	
-	var handlebars = __webpack_require__(7)['default'];
+	var handlebars = __webpack_require__(9)['default'];
 	
-	var printer = __webpack_require__(35);
+	var printer = __webpack_require__(37);
 	handlebars.PrintVisitor = printer.PrintVisitor;
 	handlebars.print = printer.print;
 	
@@ -529,7 +535,7 @@
 
 
 /***/ },
-/* 7 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -539,29 +545,29 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _handlebarsRuntime = __webpack_require__(8);
+	var _handlebarsRuntime = __webpack_require__(10);
 	
 	var _handlebarsRuntime2 = _interopRequireDefault(_handlebarsRuntime);
 	
 	// Compiler imports
 	
-	var _handlebarsCompilerAst = __webpack_require__(26);
+	var _handlebarsCompilerAst = __webpack_require__(28);
 	
 	var _handlebarsCompilerAst2 = _interopRequireDefault(_handlebarsCompilerAst);
 	
-	var _handlebarsCompilerBase = __webpack_require__(27);
+	var _handlebarsCompilerBase = __webpack_require__(29);
 	
-	var _handlebarsCompilerCompiler = __webpack_require__(32);
+	var _handlebarsCompilerCompiler = __webpack_require__(34);
 	
-	var _handlebarsCompilerJavascriptCompiler = __webpack_require__(33);
+	var _handlebarsCompilerJavascriptCompiler = __webpack_require__(35);
 	
 	var _handlebarsCompilerJavascriptCompiler2 = _interopRequireDefault(_handlebarsCompilerJavascriptCompiler);
 	
-	var _handlebarsCompilerVisitor = __webpack_require__(30);
+	var _handlebarsCompilerVisitor = __webpack_require__(32);
 	
 	var _handlebarsCompilerVisitor2 = _interopRequireDefault(_handlebarsCompilerVisitor);
 	
-	var _handlebarsNoConflict = __webpack_require__(25);
+	var _handlebarsNoConflict = __webpack_require__(27);
 	
 	var _handlebarsNoConflict2 = _interopRequireDefault(_handlebarsNoConflict);
 	
@@ -600,7 +606,7 @@
 
 
 /***/ },
-/* 8 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -614,30 +620,30 @@
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
 	
-	var _handlebarsBase = __webpack_require__(9);
+	var _handlebarsBase = __webpack_require__(11);
 	
 	var base = _interopRequireWildcard(_handlebarsBase);
 	
 	// Each of these augment the Handlebars object. No need to setup here.
 	// (This is done to easily share code between commonjs and browse envs)
 	
-	var _handlebarsSafeString = __webpack_require__(23);
+	var _handlebarsSafeString = __webpack_require__(25);
 	
 	var _handlebarsSafeString2 = _interopRequireDefault(_handlebarsSafeString);
 	
-	var _handlebarsException = __webpack_require__(11);
+	var _handlebarsException = __webpack_require__(13);
 	
 	var _handlebarsException2 = _interopRequireDefault(_handlebarsException);
 	
-	var _handlebarsUtils = __webpack_require__(10);
+	var _handlebarsUtils = __webpack_require__(12);
 	
 	var Utils = _interopRequireWildcard(_handlebarsUtils);
 	
-	var _handlebarsRuntime = __webpack_require__(24);
+	var _handlebarsRuntime = __webpack_require__(26);
 	
 	var runtime = _interopRequireWildcard(_handlebarsRuntime);
 	
-	var _handlebarsNoConflict = __webpack_require__(25);
+	var _handlebarsNoConflict = __webpack_require__(27);
 	
 	var _handlebarsNoConflict2 = _interopRequireDefault(_handlebarsNoConflict);
 	
@@ -672,7 +678,7 @@
 
 
 /***/ },
-/* 9 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -683,17 +689,17 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _utils = __webpack_require__(10);
+	var _utils = __webpack_require__(12);
 	
-	var _exception = __webpack_require__(11);
+	var _exception = __webpack_require__(13);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
-	var _helpers = __webpack_require__(12);
+	var _helpers = __webpack_require__(14);
 	
-	var _decorators = __webpack_require__(20);
+	var _decorators = __webpack_require__(22);
 	
-	var _logger = __webpack_require__(22);
+	var _logger = __webpack_require__(24);
 	
 	var _logger2 = _interopRequireDefault(_logger);
 	
@@ -782,7 +788,7 @@
 
 
 /***/ },
-/* 10 */
+/* 12 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -912,7 +918,7 @@
 
 
 /***/ },
-/* 11 */
+/* 13 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -969,7 +975,7 @@
 
 
 /***/ },
-/* 12 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -980,31 +986,31 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _helpersBlockHelperMissing = __webpack_require__(13);
+	var _helpersBlockHelperMissing = __webpack_require__(15);
 	
 	var _helpersBlockHelperMissing2 = _interopRequireDefault(_helpersBlockHelperMissing);
 	
-	var _helpersEach = __webpack_require__(14);
+	var _helpersEach = __webpack_require__(16);
 	
 	var _helpersEach2 = _interopRequireDefault(_helpersEach);
 	
-	var _helpersHelperMissing = __webpack_require__(15);
+	var _helpersHelperMissing = __webpack_require__(17);
 	
 	var _helpersHelperMissing2 = _interopRequireDefault(_helpersHelperMissing);
 	
-	var _helpersIf = __webpack_require__(16);
+	var _helpersIf = __webpack_require__(18);
 	
 	var _helpersIf2 = _interopRequireDefault(_helpersIf);
 	
-	var _helpersLog = __webpack_require__(17);
+	var _helpersLog = __webpack_require__(19);
 	
 	var _helpersLog2 = _interopRequireDefault(_helpersLog);
 	
-	var _helpersLookup = __webpack_require__(18);
+	var _helpersLookup = __webpack_require__(20);
 	
 	var _helpersLookup2 = _interopRequireDefault(_helpersLookup);
 	
-	var _helpersWith = __webpack_require__(19);
+	var _helpersWith = __webpack_require__(21);
 	
 	var _helpersWith2 = _interopRequireDefault(_helpersWith);
 	
@@ -1021,14 +1027,14 @@
 
 
 /***/ },
-/* 13 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _utils = __webpack_require__(10);
+	var _utils = __webpack_require__(12);
 	
 	exports['default'] = function (instance) {
 	  instance.registerHelper('blockHelperMissing', function (context, options) {
@@ -1066,7 +1072,7 @@
 
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1076,9 +1082,9 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _utils = __webpack_require__(10);
+	var _utils = __webpack_require__(12);
 	
-	var _exception = __webpack_require__(11);
+	var _exception = __webpack_require__(13);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
@@ -1166,7 +1172,7 @@
 
 
 /***/ },
-/* 15 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1176,7 +1182,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _exception = __webpack_require__(11);
+	var _exception = __webpack_require__(13);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
@@ -1197,14 +1203,14 @@
 
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _utils = __webpack_require__(10);
+	var _utils = __webpack_require__(12);
 	
 	exports['default'] = function (instance) {
 	  instance.registerHelper('if', function (conditional, options) {
@@ -1232,7 +1238,7 @@
 
 
 /***/ },
-/* 17 */
+/* 19 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1264,7 +1270,7 @@
 
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1282,14 +1288,14 @@
 
 
 /***/ },
-/* 19 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _utils = __webpack_require__(10);
+	var _utils = __webpack_require__(12);
 	
 	exports['default'] = function (instance) {
 	  instance.registerHelper('with', function (context, options) {
@@ -1321,7 +1327,7 @@
 
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1332,7 +1338,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _decoratorsInline = __webpack_require__(21);
+	var _decoratorsInline = __webpack_require__(23);
 	
 	var _decoratorsInline2 = _interopRequireDefault(_decoratorsInline);
 	
@@ -1343,14 +1349,14 @@
 
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _utils = __webpack_require__(10);
+	var _utils = __webpack_require__(12);
 	
 	exports['default'] = function (instance) {
 	  instance.registerDecorator('inline', function (fn, props, container, options) {
@@ -1378,14 +1384,14 @@
 
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _utils = __webpack_require__(10);
+	var _utils = __webpack_require__(12);
 	
 	var logger = {
 	  methodMap: ['debug', 'info', 'warn', 'error'],
@@ -1431,7 +1437,7 @@
 
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports) {
 
 	// Build out our basic SafeString type
@@ -1452,7 +1458,7 @@
 
 
 /***/ },
-/* 24 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1472,15 +1478,15 @@
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
 	
-	var _utils = __webpack_require__(10);
+	var _utils = __webpack_require__(12);
 	
 	var Utils = _interopRequireWildcard(_utils);
 	
-	var _exception = __webpack_require__(11);
+	var _exception = __webpack_require__(13);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
-	var _base = __webpack_require__(9);
+	var _base = __webpack_require__(11);
 	
 	function checkRevision(compilerInfo) {
 	  var compilerRevision = compilerInfo && compilerInfo[0] || 1,
@@ -1755,7 +1761,7 @@
 
 
 /***/ },
-/* 25 */
+/* 27 */
 /***/ function(module, exports) {
 
 	/* global window */
@@ -1781,7 +1787,7 @@
 
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1818,7 +1824,7 @@
 
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1833,19 +1839,19 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _parser = __webpack_require__(28);
+	var _parser = __webpack_require__(30);
 	
 	var _parser2 = _interopRequireDefault(_parser);
 	
-	var _whitespaceControl = __webpack_require__(29);
+	var _whitespaceControl = __webpack_require__(31);
 	
 	var _whitespaceControl2 = _interopRequireDefault(_whitespaceControl);
 	
-	var _helpers = __webpack_require__(31);
+	var _helpers = __webpack_require__(33);
 	
 	var Helpers = _interopRequireWildcard(_helpers);
 	
-	var _utils = __webpack_require__(10);
+	var _utils = __webpack_require__(12);
 	
 	exports.parser = _parser2['default'];
 	
@@ -1872,7 +1878,7 @@
 
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports) {
 
 	/* istanbul ignore next */
@@ -2616,7 +2622,7 @@
 
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2626,7 +2632,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _visitor = __webpack_require__(30);
+	var _visitor = __webpack_require__(32);
 	
 	var _visitor2 = _interopRequireDefault(_visitor);
 	
@@ -2843,7 +2849,7 @@
 
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2853,7 +2859,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _exception = __webpack_require__(11);
+	var _exception = __webpack_require__(13);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
@@ -2989,7 +2995,7 @@
 
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3009,7 +3015,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _exception = __webpack_require__(11);
+	var _exception = __webpack_require__(13);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
@@ -3225,7 +3231,7 @@
 
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* eslint-disable new-cap */
@@ -3240,13 +3246,13 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _exception = __webpack_require__(11);
+	var _exception = __webpack_require__(13);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
-	var _utils = __webpack_require__(10);
+	var _utils = __webpack_require__(12);
 	
-	var _ast = __webpack_require__(26);
+	var _ast = __webpack_require__(28);
 	
 	var _ast2 = _interopRequireDefault(_ast);
 	
@@ -3803,7 +3809,7 @@
 
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3813,15 +3819,15 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _base = __webpack_require__(9);
+	var _base = __webpack_require__(11);
 	
-	var _exception = __webpack_require__(11);
+	var _exception = __webpack_require__(13);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
-	var _utils = __webpack_require__(10);
+	var _utils = __webpack_require__(12);
 	
-	var _codeGen = __webpack_require__(34);
+	var _codeGen = __webpack_require__(36);
 	
 	var _codeGen2 = _interopRequireDefault(_codeGen);
 	
@@ -4937,7 +4943,7 @@
 
 
 /***/ },
-/* 34 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* global define */
@@ -4945,7 +4951,7 @@
 	
 	exports.__esModule = true;
 	
-	var _utils = __webpack_require__(10);
+	var _utils = __webpack_require__(12);
 	
 	var SourceNode = undefined;
 	
@@ -5109,7 +5115,7 @@
 
 
 /***/ },
-/* 35 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* eslint-disable new-cap */
@@ -5122,7 +5128,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _visitor = __webpack_require__(30);
+	var _visitor = __webpack_require__(32);
 	
 	var _visitor2 = _interopRequireDefault(_visitor);
 	
@@ -5301,17 +5307,17 @@
 
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 	
-	var EventEmitter = __webpack_require__(37).EventEmitter;
-	var spawn = __webpack_require__(38).spawn;
-	var readlink = __webpack_require__(39).readlinkSync;
-	var path = __webpack_require__(40);
+	var EventEmitter = __webpack_require__(39).EventEmitter;
+	var spawn = __webpack_require__(40).spawn;
+	var readlink = __webpack_require__(41).readlinkSync;
+	var path = __webpack_require__(42);
 	var dirname = path.dirname;
 	var basename = path.basename;
 	var fs = __webpack_require__(2);
@@ -6417,19 +6423,19 @@
 
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports) {
 
 	module.exports = require("events");
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports) {
 
 	module.exports = require("child_process");
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var fs = __webpack_require__(2)
@@ -6447,19 +6453,19 @@
 
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports) {
 
 	module.exports = require("path");
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var number = __webpack_require__(42).number;
-	var editors = __webpack_require__(45);
-	var extractFilename = __webpack_require__(42).extractFilename;
-	var openFactory = __webpack_require__(50).factory;
+	var number = __webpack_require__(44).number;
+	var editors = __webpack_require__(47);
+	var extractFilename = __webpack_require__(44).extractFilename;
+	var openFactory = __webpack_require__(52).factory;
 	
 	module.exports = {
 	  configure: function(options, cb) {
@@ -6518,11 +6524,11 @@
 
 
 /***/ },
-/* 42 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var osHomeDir = __webpack_require__(43)();
-	var path = __webpack_require__(40);
+	var osHomeDir = __webpack_require__(45)();
+	var path = __webpack_require__(42);
 	
 	module.exports = {
 	  number: function(value, fallback) {
@@ -6575,11 +6581,11 @@
 
 
 /***/ },
-/* 43 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-	var os = __webpack_require__(44);
+	var os = __webpack_require__(46);
 	
 	function homedir() {
 		var env = process.env;
@@ -6605,36 +6611,36 @@
 
 
 /***/ },
-/* 44 */
+/* 46 */
 /***/ function(module, exports) {
 
 	module.exports = require("os");
 
 /***/ },
-/* 45 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  atom: __webpack_require__(46),
-	  code: __webpack_require__(51),
-	  sublime: __webpack_require__(52),
-	  webstorm: __webpack_require__(53),
-	  phpstorm: __webpack_require__(55),
-	  idea14ce: __webpack_require__(56)
+	  atom: __webpack_require__(48),
+	  code: __webpack_require__(53),
+	  sublime: __webpack_require__(54),
+	  webstorm: __webpack_require__(55),
+	  phpstorm: __webpack_require__(57),
+	  idea14ce: __webpack_require__(58)
 	};
 
 
 /***/ },
-/* 46 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var atHomeDir = __webpack_require__(42).atHomeDir;
+	var atHomeDir = __webpack_require__(44).atHomeDir;
 	
 	var settings = {
 	  pattern: '{filename}:{line}:{column}'
 	};
 	
-	var detect = __webpack_require__(47).lazy('Atom Editor', ['atom'], '-h', {
+	var detect = __webpack_require__(49).lazy('Atom Editor', ['atom'], '-h', {
 	  darwin: [
 	    '/Applications/Atom.app/Contents/Resources/app/atom.sh'
 	  ],
@@ -6643,7 +6649,7 @@
 	  ]
 	});
 	
-	var open = __webpack_require__(50).detectAndOpenFactory(detect, settings);
+	var open = __webpack_require__(52).detectAndOpenFactory(detect, settings);
 	
 	module.exports = {
 	  settings: settings,
@@ -6653,12 +6659,12 @@
 
 
 /***/ },
-/* 47 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Promise = __webpack_require__(48).Promise;
-	var check = __webpack_require__(49);
-	var any = __webpack_require__(42).any;
+	var Promise = __webpack_require__(50).Promise;
+	var check = __webpack_require__(51);
+	var any = __webpack_require__(44).any;
 	
 	function detect(name, commands, args, locations) {
 	  function run(task) {
@@ -6691,7 +6697,7 @@
 
 
 /***/ },
-/* 48 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;(function(global){
@@ -7043,13 +7049,13 @@
 
 
 /***/ },
-/* 49 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Promise = __webpack_require__(48).Promise;
-	var exec = __webpack_require__(38).exec;
+	var Promise = __webpack_require__(50).Promise;
+	var exec = __webpack_require__(40).exec;
 	var fs = __webpack_require__(2);
-	var quote = __webpack_require__(42).quote;
+	var quote = __webpack_require__(44).quote;
 	
 	function checkCommand(cmd, name, args) {
 	  return new Promise(function(resolve, reject) {
@@ -7082,15 +7088,15 @@
 
 
 /***/ },
-/* 50 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Promise = __webpack_require__(48).Promise;
-	var exec = __webpack_require__(38).exec;
-	var number = __webpack_require__(42).number;
-	var quote = __webpack_require__(42).quote;
-	var extractFilename = __webpack_require__(42).extractFilename;
-	var append = __webpack_require__(42).append;
+	var Promise = __webpack_require__(50).Promise;
+	var exec = __webpack_require__(40).exec;
+	var number = __webpack_require__(44).number;
+	var quote = __webpack_require__(44).quote;
+	var extractFilename = __webpack_require__(44).extractFilename;
+	var append = __webpack_require__(44).append;
 	
 	function makeArguments(filename, settings) {
 	  var info = extractFilename(filename);
@@ -7157,16 +7163,16 @@
 
 
 /***/ },
-/* 51 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var atHomeDir = __webpack_require__(42).atHomeDir;
+	var atHomeDir = __webpack_require__(44).atHomeDir;
 	
 	var settings = {
 	  pattern: '-r -g {filename}:{line}:{column}'
 	};
 	
-	var detect = __webpack_require__(47).lazy('Visual Studio Code', ['code'], '-h', {
+	var detect = __webpack_require__(49).lazy('Visual Studio Code', ['code'], '-h', {
 	  darwin: [
 	    '/Applications/Visual Studio Code.app/Contents/MacOS/Electron'
 	  ],
@@ -7177,7 +7183,7 @@
 	  ]
 	});
 	
-	var open = __webpack_require__(50).detectAndOpenFactory(detect, settings);
+	var open = __webpack_require__(52).detectAndOpenFactory(detect, settings);
 	
 	module.exports = {
 	  settings: settings,
@@ -7187,14 +7193,14 @@
 
 
 /***/ },
-/* 52 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var settings = {
 	  pattern: '{filename}:{line}:{column}'
 	};
 	
-	var detect = __webpack_require__(47).lazy('Sublime Text', ['subl'], '-h', {
+	var detect = __webpack_require__(49).lazy('Sublime Text', ['subl'], '-h', {
 	  darwin: [
 	    '/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl'
 	  ],
@@ -7208,7 +7214,7 @@
 	  ]
 	});
 	
-	var open = __webpack_require__(50).detectAndOpenFactory(detect, settings);
+	var open = __webpack_require__(52).detectAndOpenFactory(detect, settings);
 	
 	module.exports = {
 	  settings: settings,
@@ -7218,17 +7224,17 @@
 
 
 /***/ },
-/* 53 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var ide = __webpack_require__(54);
+	var ide = __webpack_require__(56);
 	
 	var detect = ide.detect({
 	  appFolder: 'WebStorm',
 	  name: 'WebStorm IDE',
 	  executable: 'webstorm'
 	});
-	var open = __webpack_require__(50).detectAndOpenFactory(detect, ide.settings);
+	var open = __webpack_require__(52).detectAndOpenFactory(detect, ide.settings);
 	
 	module.exports = {
 	  settings: ide.settings,
@@ -7238,7 +7244,7 @@
 
 
 /***/ },
-/* 54 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var settings = {
@@ -7246,7 +7252,7 @@
 	};
 	
 	var fs = __webpack_require__(2);
-	var path = __webpack_require__(40);
+	var path = __webpack_require__(42);
 	
 	var winDirs = (function() {
 	  var jetbrainsFolder = 'c:/Program Files (x86)/JetBrains/';
@@ -7265,7 +7271,7 @@
 	})();
 	
 	var detect = function(ide) {
-	  return __webpack_require__(47).lazy(ide.name, [], '', {
+	  return __webpack_require__(49).lazy(ide.name, [], '', {
 	    darwin: [
 	      '/Applications/' + ide.appFolder + '.app/Contents/MacOS/' + ide.executable
 	    ],
@@ -7282,17 +7288,17 @@
 
 
 /***/ },
-/* 55 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var ide = __webpack_require__(54);
+	var ide = __webpack_require__(56);
 	
 	var detect = ide.detect({
 	  appFolder: 'PhpStorm',
 	  name: 'PhpStorm IDE',
 	  executable: 'phpstorm'
 	});
-	var open = __webpack_require__(50).detectAndOpenFactory(detect, ide.settings);
+	var open = __webpack_require__(52).detectAndOpenFactory(detect, ide.settings);
 	
 	module.exports = {
 	  settings: ide.settings,
@@ -7302,17 +7308,17 @@
 
 
 /***/ },
-/* 56 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var ide = __webpack_require__(54);
+	var ide = __webpack_require__(56);
 	
 	var detect = ide.detect({
 	  appFolder: 'IntelliJ IDEA 14 CE',
 	  name: 'IDEA 14 CE',
 	  executable: 'idea'
 	});
-	var open = __webpack_require__(50).detectAndOpenFactory(detect, ide.settings);
+	var open = __webpack_require__(52).detectAndOpenFactory(detect, ide.settings);
 	
 	module.exports = {
 	  settings: ide.settings,
@@ -7320,12 +7326,6 @@
 	  open: open
 	};
 
-
-/***/ },
-/* 57 */
-/***/ function(module, exports) {
-
-	module.exports = require("crypto");
 
 /***/ }
 /******/ ]);

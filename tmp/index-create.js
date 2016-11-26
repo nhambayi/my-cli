@@ -45,11 +45,11 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	const fs = __webpack_require__(1);
-	const SerializationHelper_1 = __webpack_require__(2);
-	const Template_1 = __webpack_require__(3);
-	const TemplateDatabase_1 = __webpack_require__(4);
-	const crypto = __webpack_require__(5);
+	const fs = __webpack_require__(2);
+	const SerializationHelper_1 = __webpack_require__(3);
+	const Template_1 = __webpack_require__(4);
+	const TemplateDatabase_1 = __webpack_require__(5);
+	const crypto = __webpack_require__(6);
 	console.log("Creating...");
 	class CreateCommandArguments {
 	}
@@ -65,7 +65,7 @@
 	                const templates = db.templates.filter(item => item.id === commandArgs.templateName);
 	                if (templates.length === 0) {
 	                    let template = new Template_1.Template();
-	                    template.filename = token;
+	                    template.name = token;
 	                    template.id = commandArgs.templateName;
 	                    db.templates.push(template);
 	                    fs.createReadStream(commandArgs.sourceFilePath)
@@ -89,13 +89,14 @@
 
 
 /***/ },
-/* 1 */
+/* 1 */,
+/* 2 */
 /***/ function(module, exports) {
 
 	module.exports = require("fs");
 
 /***/ },
-/* 2 */
+/* 3 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -117,27 +118,35 @@
 
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports) {
 
 	"use strict";
 	class Template {
+	    get id() {
+	        return this._id;
+	    }
+	    set id(value) {
+	        this._id = value;
+	    }
 	}
 	exports.Template = Template;
 
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	"use strict";
 	class TemplateDatabase {
+	    initialize() {
+	    }
 	}
 	exports.TemplateDatabase = TemplateDatabase;
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	module.exports = require("crypto");

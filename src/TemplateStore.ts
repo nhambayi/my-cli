@@ -1,23 +1,13 @@
-import { ITemplateIndex, ITemplateStore, IFileStore, IApplicationConfiguration, ILogger } from "./Interfaces";
+import { ITemplateIndex, ITemplate, ITemplateStore, IFileStore, IApplicationConfiguration, ILogger } from "./Interfaces";
 import { SerializationHelper } from "./SerializationHelper";
 import { INDEX_FOLDER_NAME, TEMPLATES_COLLECTION_NAME } from "./Constants";
-import * as db from "diskdb";
+import { DiskDbTemplateIndex } from "./DiskDbTemplateIndex";
+import {Template} from "./Template";
 
 export class TemplateStore implements ITemplateStore {
 
-    constructor(config: IApplicationConfiguration, fileStore: IFileStore, logger: ILogger) {
-        this.configuration = config;
-        this.fileStore = fileStore;
-        this.logger = logger;
+    constructor(private templateIndex: ITemplateIndex, private configuration: IApplicationConfiguration, private fileStore: IFileStore, private logger: ILogger) {
     }
-
-    templateIndex: ITemplateIndex;
-    fileStore: IFileStore;
-    configuration: IApplicationConfiguration;
-    logger: ILogger;
-    database: db.IDiskDb;
-    templateCollection: db.IDiskDbCollection;
-
 
     async initialize() {
         return new Promise<void>((resolve, reject) => {
@@ -32,9 +22,7 @@ export class TemplateStore implements ITemplateStore {
             this.initiializeTemplateIndex().then(() => {
                 resolve();
             }).catch((err) => { console.log(err); });
-
         });
-
     }
 
     add(): void {
@@ -49,12 +37,12 @@ export class TemplateStore implements ITemplateStore {
 
     }
 
-    find(): void {
-
+    find(): Array<Template>  {
+        return null;
     }
 
-    getAll(): void {
-
+    getAll(): Array<Template> {
+        return this.templateIndex.getAll();
     }
 
     private async load(): Promise<string> {
@@ -85,13 +73,12 @@ export class TemplateStore implements ITemplateStore {
         return new Promise<void>((resolve, reject) => {
             if (!this.fileStore.fileExists(this.configuration.templateIndexPath)) {
                 this.createFolder(this.configuration.templateIndexPath).then(() => {
-                    this.database = db.connect(this.configuration.templateIndexPath);
-                    this.templateCollection = this.database.loadCollections([TEMPLATES_COLLECTION_NAME]);
+                    this.templateIndex.connect();
+                    resolve();
                 });
             } else {
-                this.database = db.connect(this.configuration.templateIndexPath);
-                this.database.loadCollections([TEMPLATES_COLLECTION_NAME]);
-                this.templateCollection = this.database[TEMPLATES_COLLECTION_NAME];
+                this.templateIndex.connect();
+                resolve();
             }
         });
     }

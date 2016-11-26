@@ -16,6 +16,7 @@ console.log("Welcome to TBD");
 program
   .version("0.10.0")
   .command("create [name]", "create a new template")
+  .command("add [name]", "add a new template")
   .command("list", "list all templates", {isDefault: true})
   .option("-t, --template", "template")
   .option("-o, --output", "output filename")
@@ -70,7 +71,7 @@ if (args["list"]) {
         console.log("NAME\t\t\tFILENAME");
         for (let entry of db.templates) {
 
-            console.log(`${entry.id}\t\t${entry.filename}\t${entry.extension}`);
+            console.log(`${entry.id}\t\t${entry.name}\t${entry.extension}`);
         }
     });
 }
@@ -88,7 +89,7 @@ if (args["new"] === true) {
 
             if (templates.length === 0) {
                 let template = new Template();
-                template.filename = token;
+                template.name = token;
                 template.id = args["name"];
                 db.templates.push(template);
 
@@ -131,7 +132,7 @@ if (args["add"] === true) {
 
             let template = templates[0];
 
-            fs.readFile(`${args["templateFolder"]}/templates/${template.filename}`, "utf-8", function(err, templateText) {
+            fs.readFile(`${args["templateFolder"]}/templates/${template.name}`, "utf-8", function(err, templateText) {
                 if (err) {
                     console.log(err);
                     return;
@@ -169,7 +170,7 @@ if (args["edit"] === true) {
             console.error("Something went wrong: " + err);
         });
 
-        editor.open(args["templateFolder"] + "/templates/" + template.filename)
+        editor.open(args["templateFolder"] + "/templates/" + template.name)
             .then(function() {
                 console.log("Success!");
             }, function(err) {

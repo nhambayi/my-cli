@@ -1,11 +1,16 @@
 
 export interface ITemplateIndex {
-
+    isConnected: boolean;
+    connect(): Promise<void>;
+    getAll(): Array<ITemplate>;
+    add(ITemplate): void;
 }
 
 export interface ITemplate {
+    _id: string;
     name: string;
     id: string;
+    description: string;
     type: string;
     extension: string;
     context: string;
@@ -17,7 +22,7 @@ export interface ITemplateStore {
     update(): void;
     remove(): void;
     find(name: string, project: string): void;
-    getAll(): void;
+    getAll(): Array<ITemplate> ;
 }
 
 export interface IFileStore {

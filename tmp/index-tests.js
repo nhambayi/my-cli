@@ -45,27 +45,27 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	__webpack_require__(82);
-	__webpack_require__(83);
+	__webpack_require__(85);
+	__webpack_require__(86);
 
 
 /***/ },
-/* 1 */
+/* 1 */,
+/* 2 */
 /***/ function(module, exports) {
 
 	module.exports = require("fs");
 
 /***/ },
-/* 2 */,
 /* 3 */,
 /* 4 */,
-/* 5 */
+/* 5 */,
+/* 6 */
 /***/ function(module, exports) {
 
 	module.exports = require("crypto");
 
 /***/ },
-/* 6 */,
 /* 7 */,
 /* 8 */,
 /* 9 */,
@@ -100,13 +100,13 @@
 /* 38 */,
 /* 39 */,
 /* 40 */,
-/* 41 */
+/* 41 */,
+/* 42 */
 /***/ function(module, exports) {
 
 	module.exports = require("path");
 
 /***/ },
-/* 42 */,
 /* 43 */,
 /* 44 */,
 /* 45 */,
@@ -122,8 +122,9 @@
 /* 55 */,
 /* 56 */,
 /* 57 */,
-/* 58 */
-/***/ function(module, exports, __webpack_require__) {
+/* 58 */,
+/* 59 */
+/***/ function(module, exports) {
 
 	"use strict";
 	var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -134,11 +135,10 @@
 	        step((generator = generator.apply(thisArg, _arguments)).next());
 	    });
 	};
-	const Constants_1 = __webpack_require__(59);
-	const db = __webpack_require__(60);
 	class TemplateStore {
-	    constructor(config, fileStore, logger) {
-	        this.configuration = config;
+	    constructor(templateIndex, configuration, fileStore, logger) {
+	        this.templateIndex = templateIndex;
+	        this.configuration = configuration;
 	        this.fileStore = fileStore;
 	        this.logger = logger;
 	    }
@@ -165,8 +165,10 @@
 	    remove() {
 	    }
 	    find() {
+	        return null;
 	    }
 	    getAll() {
+	        return this.templateIndex.getAll();
 	    }
 	    load() {
 	        return __awaiter(this, void 0, void 0, function* () {
@@ -201,14 +203,13 @@
 	            return new Promise((resolve, reject) => {
 	                if (!this.fileStore.fileExists(this.configuration.templateIndexPath)) {
 	                    this.createFolder(this.configuration.templateIndexPath).then(() => {
-	                        this.database = db.connect(this.configuration.templateIndexPath);
-	                        this.templateCollection = this.database.loadCollections([Constants_1.TEMPLATES_COLLECTION_NAME]);
+	                        this.templateIndex.connect();
+	                        resolve();
 	                    });
 	                }
 	                else {
-	                    this.database = db.connect(this.configuration.templateIndexPath);
-	                    this.database.loadCollections([Constants_1.TEMPLATES_COLLECTION_NAME]);
-	                    this.templateCollection = this.database[Constants_1.TEMPLATES_COLLECTION_NAME];
+	                    this.templateIndex.connect();
+	                    resolve();
 	                }
 	            });
 	        });
@@ -218,7 +219,8 @@
 
 
 /***/ },
-/* 59 */
+/* 60 */,
+/* 61 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -228,7 +230,417 @@
 
 
 /***/ },
-/* 60 */
+/* 62 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	const fs = __webpack_require__(2);
+	class FileStore {
+	    loadFile(path, callback) {
+	        fs.readFile(path, "utf8", (data, err) => {
+	            callback(err, data);
+	        });
+	    }
+	    saveFile(path, content, callback) {
+	        fs.writeFile(path, content, (err) => {
+	            callback(false, err);
+	        });
+	    }
+	    createFolder(path, callback) {
+	        fs.mkdir(path, (err) => {
+	            callback(false, err);
+	        });
+	    }
+	    deleteFile(path, callback) {
+	        callback(false, "not implemented");
+	    }
+	    fileExists(path) {
+	        let exists = fs.existsSync(path);
+	        return exists;
+	    }
+	}
+	exports.FileStore = FileStore;
+
+
+/***/ },
+/* 63 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	const chalk = __webpack_require__(64);
+	class Logger {
+	    log(message) {
+	        console.log(message);
+	    }
+	    warn(message) {
+	        console.log(chalk.yellow(message));
+	    }
+	    error(message) {
+	        console.log(chalk.red(message));
+	    }
+	}
+	exports.Logger = Logger;
+
+
+/***/ },
+/* 64 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	var escapeStringRegexp = __webpack_require__(65);
+	var ansiStyles = __webpack_require__(66);
+	var stripAnsi = __webpack_require__(68);
+	var hasAnsi = __webpack_require__(70);
+	var supportsColor = __webpack_require__(71);
+	var defineProps = Object.defineProperties;
+	var isSimpleWindowsTerm = process.platform === 'win32' && !/^xterm/i.test(process.env.TERM);
+	
+	function Chalk(options) {
+		// detect mode if not set manually
+		this.enabled = !options || options.enabled === undefined ? supportsColor : options.enabled;
+	}
+	
+	// use bright blue on Windows as the normal blue color is illegible
+	if (isSimpleWindowsTerm) {
+		ansiStyles.blue.open = '\u001b[94m';
+	}
+	
+	var styles = (function () {
+		var ret = {};
+	
+		Object.keys(ansiStyles).forEach(function (key) {
+			ansiStyles[key].closeRe = new RegExp(escapeStringRegexp(ansiStyles[key].close), 'g');
+	
+			ret[key] = {
+				get: function () {
+					return build.call(this, this._styles.concat(key));
+				}
+			};
+		});
+	
+		return ret;
+	})();
+	
+	var proto = defineProps(function chalk() {}, styles);
+	
+	function build(_styles) {
+		var builder = function () {
+			return applyStyle.apply(builder, arguments);
+		};
+	
+		builder._styles = _styles;
+		builder.enabled = this.enabled;
+		// __proto__ is used because we must return a function, but there is
+		// no way to create a function with a different prototype.
+		/* eslint-disable no-proto */
+		builder.__proto__ = proto;
+	
+		return builder;
+	}
+	
+	function applyStyle() {
+		// support varags, but simply cast to string in case there's only one arg
+		var args = arguments;
+		var argsLen = args.length;
+		var str = argsLen !== 0 && String(arguments[0]);
+	
+		if (argsLen > 1) {
+			// don't slice `arguments`, it prevents v8 optimizations
+			for (var a = 1; a < argsLen; a++) {
+				str += ' ' + args[a];
+			}
+		}
+	
+		if (!this.enabled || !str) {
+			return str;
+		}
+	
+		var nestedStyles = this._styles;
+		var i = nestedStyles.length;
+	
+		// Turns out that on Windows dimmed gray text becomes invisible in cmd.exe,
+		// see https://github.com/chalk/chalk/issues/58
+		// If we're on Windows and we're dealing with a gray color, temporarily make 'dim' a noop.
+		var originalDim = ansiStyles.dim.open;
+		if (isSimpleWindowsTerm && (nestedStyles.indexOf('gray') !== -1 || nestedStyles.indexOf('grey') !== -1)) {
+			ansiStyles.dim.open = '';
+		}
+	
+		while (i--) {
+			var code = ansiStyles[nestedStyles[i]];
+	
+			// Replace any instances already present with a re-opening code
+			// otherwise only the part of the string until said closing code
+			// will be colored, and the rest will simply be 'plain'.
+			str = code.open + str.replace(code.closeRe, code.open) + code.close;
+		}
+	
+		// Reset the original 'dim' if we changed it to work around the Windows dimmed gray issue.
+		ansiStyles.dim.open = originalDim;
+	
+		return str;
+	}
+	
+	function init() {
+		var ret = {};
+	
+		Object.keys(styles).forEach(function (name) {
+			ret[name] = {
+				get: function () {
+					return build.call(this, [name]);
+				}
+			};
+		});
+	
+		return ret;
+	}
+	
+	defineProps(Chalk.prototype, init());
+	
+	module.exports = new Chalk();
+	module.exports.styles = ansiStyles;
+	module.exports.hasColor = hasAnsi;
+	module.exports.stripColor = stripAnsi;
+	module.exports.supportsColor = supportsColor;
+
+
+/***/ },
+/* 65 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
+	
+	module.exports = function (str) {
+		if (typeof str !== 'string') {
+			throw new TypeError('Expected a string');
+		}
+	
+		return str.replace(matchOperatorsRe, '\\$&');
+	};
+
+
+/***/ },
+/* 66 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {'use strict';
+	
+	function assembleStyles () {
+		var styles = {
+			modifiers: {
+				reset: [0, 0],
+				bold: [1, 22], // 21 isn't widely supported and 22 does the same thing
+				dim: [2, 22],
+				italic: [3, 23],
+				underline: [4, 24],
+				inverse: [7, 27],
+				hidden: [8, 28],
+				strikethrough: [9, 29]
+			},
+			colors: {
+				black: [30, 39],
+				red: [31, 39],
+				green: [32, 39],
+				yellow: [33, 39],
+				blue: [34, 39],
+				magenta: [35, 39],
+				cyan: [36, 39],
+				white: [37, 39],
+				gray: [90, 39]
+			},
+			bgColors: {
+				bgBlack: [40, 49],
+				bgRed: [41, 49],
+				bgGreen: [42, 49],
+				bgYellow: [43, 49],
+				bgBlue: [44, 49],
+				bgMagenta: [45, 49],
+				bgCyan: [46, 49],
+				bgWhite: [47, 49]
+			}
+		};
+	
+		// fix humans
+		styles.colors.grey = styles.colors.gray;
+	
+		Object.keys(styles).forEach(function (groupName) {
+			var group = styles[groupName];
+	
+			Object.keys(group).forEach(function (styleName) {
+				var style = group[styleName];
+	
+				styles[styleName] = group[styleName] = {
+					open: '\u001b[' + style[0] + 'm',
+					close: '\u001b[' + style[1] + 'm'
+				};
+			});
+	
+			Object.defineProperty(styles, groupName, {
+				value: group,
+				enumerable: false
+			});
+		});
+	
+		return styles;
+	}
+	
+	Object.defineProperty(module, 'exports', {
+		enumerable: true,
+		get: assembleStyles
+	});
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(67)(module)))
+
+/***/ },
+/* 67 */
+/***/ function(module, exports) {
+
+	module.exports = function(module) {
+		if(!module.webpackPolyfill) {
+			module.deprecate = function() {};
+			module.paths = [];
+			// module.parent = undefined by default
+			module.children = [];
+			module.webpackPolyfill = 1;
+		}
+		return module;
+	}
+
+
+/***/ },
+/* 68 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	var ansiRegex = __webpack_require__(69)();
+	
+	module.exports = function (str) {
+		return typeof str === 'string' ? str.replace(ansiRegex, '') : str;
+	};
+
+
+/***/ },
+/* 69 */
+/***/ function(module, exports) {
+
+	'use strict';
+	module.exports = function () {
+		return /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+	};
+
+
+/***/ },
+/* 70 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	var ansiRegex = __webpack_require__(69);
+	var re = new RegExp(ansiRegex().source); // remove the `g` flag
+	module.exports = re.test.bind(re);
+
+
+/***/ },
+/* 71 */
+/***/ function(module, exports) {
+
+	'use strict';
+	var argv = process.argv;
+	
+	var terminator = argv.indexOf('--');
+	var hasFlag = function (flag) {
+		flag = '--' + flag;
+		var pos = argv.indexOf(flag);
+		return pos !== -1 && (terminator !== -1 ? pos < terminator : true);
+	};
+	
+	module.exports = (function () {
+		if ('FORCE_COLOR' in process.env) {
+			return true;
+		}
+	
+		if (hasFlag('no-color') ||
+			hasFlag('no-colors') ||
+			hasFlag('color=false')) {
+			return false;
+		}
+	
+		if (hasFlag('color') ||
+			hasFlag('colors') ||
+			hasFlag('color=true') ||
+			hasFlag('color=always')) {
+			return true;
+		}
+	
+		if (process.stdout && !process.stdout.isTTY) {
+			return false;
+		}
+	
+		if (process.platform === 'win32') {
+			return true;
+		}
+	
+		if ('COLORTERM' in process.env) {
+			return true;
+		}
+	
+		if (process.env.TERM === 'dumb') {
+			return false;
+		}
+	
+		if (/^screen|^xterm|^vt100|color|ansi|cygwin|linux/i.test(process.env.TERM)) {
+			return true;
+		}
+	
+		return false;
+	})();
+
+
+/***/ },
+/* 72 */,
+/* 73 */,
+/* 74 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+	    return new (P || (P = Promise))(function (resolve, reject) {
+	        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+	        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+	        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+	        step((generator = generator.apply(thisArg, _arguments)).next());
+	    });
+	};
+	const db = __webpack_require__(75);
+	class DiskDbTemplateIndex {
+	    constructor(pathToStore, templateCollectionName) {
+	        this.pathToStore = pathToStore;
+	        this.templateCollectionName = templateCollectionName;
+	        this.isConnected = false;
+	    }
+	    connect() {
+	        return __awaiter(this, void 0, void 0, function* () {
+	            return new Promise((resolve, reject) => {
+	                this.database = db.connect(this.pathToStore);
+	                this.database.loadCollections([this.templateCollectionName]);
+	                this.templateCollection = this.database[this.templateCollectionName];
+	                resolve();
+	            });
+	        });
+	    }
+	    add(template) {
+	        this.templateCollection.save(template);
+	    }
+	    getAll() {
+	        return this.templateCollection.find();
+	    }
+	}
+	exports.DiskDbTemplateIndex = DiskDbTemplateIndex;
+
+
+/***/ },
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -241,13 +653,13 @@
 	
 	'use strict';
 	//global modules
-	var path = __webpack_require__(41),
-	    c = __webpack_require__(61),
+	var path = __webpack_require__(42),
+	    c = __webpack_require__(76),
 	    e = c.red,
 	    s = c.green;
 	
 	//local modules
-	var util = __webpack_require__(65);
+	var util = __webpack_require__(80);
 	
 	
 	var db = {
@@ -278,7 +690,7 @@
 	                    util.writeToFile(p);
 	                }
 	                var _c = collections[i].replace('.json', '');
-	                this[_c] = new __webpack_require__(68)('./collection')(this, _c);
+	                this[_c] = new __webpack_require__(82)('./collection')(this, _c);
 	            }
 	        } else {
 	            console.log(e('Invalid Collections Array.', 'Expected Format : ', '[\'collection1\',\'collection2\',\'collection3\']'));
@@ -292,13 +704,13 @@
 
 
 /***/ },
-/* 61 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-	var ansi = __webpack_require__(62);
-	var stripAnsi = __webpack_require__(63);
-	var hasColor = __webpack_require__(64);
+	var ansi = __webpack_require__(77);
+	var stripAnsi = __webpack_require__(78);
+	var hasColor = __webpack_require__(79);
 	var defineProps = Object.defineProperties;
 	var chalk = module.exports;
 	
@@ -361,7 +773,7 @@
 
 
 /***/ },
-/* 62 */
+/* 77 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -405,7 +817,7 @@
 
 
 /***/ },
-/* 63 */
+/* 78 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -415,7 +827,7 @@
 
 
 /***/ },
-/* 64 */
+/* 79 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -453,7 +865,7 @@
 
 
 /***/ },
-/* 65 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -465,8 +877,8 @@
 	 */
 	
 	/*jshint -W027*/
-	var fs = __webpack_require__(1);
-	var merge = __webpack_require__(66);
+	var fs = __webpack_require__(2);
+	var merge = __webpack_require__(81);
 	var util = {};
 	
 	util.isValidPath = function(path) {
@@ -618,7 +1030,7 @@
 
 
 /***/ },
-/* 66 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/*!
@@ -799,32 +1211,16 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(67)(module)))
 
 /***/ },
-/* 67 */
-/***/ function(module, exports) {
-
-	module.exports = function(module) {
-		if(!module.webpackPolyfill) {
-			module.deprecate = function() {};
-			module.paths = [];
-			// module.parent = undefined by default
-			module.children = [];
-			module.webpackPolyfill = 1;
-		}
-		return module;
-	}
-
-
-/***/ },
-/* 68 */
+/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var map = {
-		"./collection": 69,
-		"./collection.js": 69,
-		"./diskdb": 60,
-		"./diskdb.js": 60,
-		"./util": 65,
-		"./util.js": 65
+		"./collection": 83,
+		"./collection.js": 83,
+		"./diskdb": 75,
+		"./diskdb.js": 75,
+		"./util": 80,
+		"./util.js": 80
 	};
 	function webpackContext(req) {
 		return __webpack_require__(webpackContextResolve(req));
@@ -837,11 +1233,11 @@
 	};
 	webpackContext.resolve = webpackContextResolve;
 	module.exports = webpackContext;
-	webpackContext.id = 68;
+	webpackContext.id = 82;
 
 
 /***/ },
-/* 69 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -852,9 +1248,9 @@
 	 * Licensed under the MIT license.
 	 */
 	
-	var util = __webpack_require__(65),
-	    path = __webpack_require__(41),
-	    uuid = __webpack_require__(70);
+	var util = __webpack_require__(80),
+	    path = __webpack_require__(42),
+	    uuid = __webpack_require__(84);
 	
 	module.exports = function(db, collectionName) {
 	    var coltn = {};
@@ -960,7 +1356,7 @@
 
 
 /***/ },
-/* 70 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;//     uuid.js
@@ -1021,7 +1417,7 @@
 	    // Moderately fast, high quality
 	    if (true) {
 	      try {
-	        var _rb = __webpack_require__(5).randomBytes;
+	        var _rb = __webpack_require__(6).randomBytes;
 	        _nodeRNG = _rng = _rb && function() {return _rb(16);};
 	        _rng();
 	      } catch(e) {}
@@ -1238,375 +1634,22 @@
 
 
 /***/ },
-/* 71 */,
-/* 72 */
+/* 85 */
+/***/ function(module, exports) {
+
+
+
+/***/ },
+/* 86 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	const fs = __webpack_require__(1);
-	class FileStore {
-	    loadFile(path, callback) {
-	        fs.readFile(path, "utf8", (data, err) => {
-	            callback(err, data);
-	        });
-	    }
-	    saveFile(path, content, callback) {
-	        fs.writeFile(path, content, (err) => {
-	            callback(false, err);
-	        });
-	    }
-	    createFolder(path, callback) {
-	        fs.mkdir(path, (err) => {
-	            callback(false, err);
-	        });
-	    }
-	    deleteFile(path, callback) {
-	        callback(false, "not implemented");
-	    }
-	    fileExists(path) {
-	        let exists = fs.existsSync(path);
-	        return exists;
-	    }
-	}
-	exports.FileStore = FileStore;
-
-
-/***/ },
-/* 73 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	const chalk = __webpack_require__(74);
-	class Logger {
-	    log(message) {
-	        console.log(message);
-	    }
-	    warn(message) {
-	        console.log(chalk.yellow(message));
-	    }
-	    error(message) {
-	        console.log(chalk.red(message));
-	    }
-	}
-	exports.Logger = Logger;
-
-
-/***/ },
-/* 74 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	var escapeStringRegexp = __webpack_require__(75);
-	var ansiStyles = __webpack_require__(76);
-	var stripAnsi = __webpack_require__(77);
-	var hasAnsi = __webpack_require__(79);
-	var supportsColor = __webpack_require__(80);
-	var defineProps = Object.defineProperties;
-	var isSimpleWindowsTerm = process.platform === 'win32' && !/^xterm/i.test(process.env.TERM);
-	
-	function Chalk(options) {
-		// detect mode if not set manually
-		this.enabled = !options || options.enabled === undefined ? supportsColor : options.enabled;
-	}
-	
-	// use bright blue on Windows as the normal blue color is illegible
-	if (isSimpleWindowsTerm) {
-		ansiStyles.blue.open = '\u001b[94m';
-	}
-	
-	var styles = (function () {
-		var ret = {};
-	
-		Object.keys(ansiStyles).forEach(function (key) {
-			ansiStyles[key].closeRe = new RegExp(escapeStringRegexp(ansiStyles[key].close), 'g');
-	
-			ret[key] = {
-				get: function () {
-					return build.call(this, this._styles.concat(key));
-				}
-			};
-		});
-	
-		return ret;
-	})();
-	
-	var proto = defineProps(function chalk() {}, styles);
-	
-	function build(_styles) {
-		var builder = function () {
-			return applyStyle.apply(builder, arguments);
-		};
-	
-		builder._styles = _styles;
-		builder.enabled = this.enabled;
-		// __proto__ is used because we must return a function, but there is
-		// no way to create a function with a different prototype.
-		/* eslint-disable no-proto */
-		builder.__proto__ = proto;
-	
-		return builder;
-	}
-	
-	function applyStyle() {
-		// support varags, but simply cast to string in case there's only one arg
-		var args = arguments;
-		var argsLen = args.length;
-		var str = argsLen !== 0 && String(arguments[0]);
-	
-		if (argsLen > 1) {
-			// don't slice `arguments`, it prevents v8 optimizations
-			for (var a = 1; a < argsLen; a++) {
-				str += ' ' + args[a];
-			}
-		}
-	
-		if (!this.enabled || !str) {
-			return str;
-		}
-	
-		var nestedStyles = this._styles;
-		var i = nestedStyles.length;
-	
-		// Turns out that on Windows dimmed gray text becomes invisible in cmd.exe,
-		// see https://github.com/chalk/chalk/issues/58
-		// If we're on Windows and we're dealing with a gray color, temporarily make 'dim' a noop.
-		var originalDim = ansiStyles.dim.open;
-		if (isSimpleWindowsTerm && (nestedStyles.indexOf('gray') !== -1 || nestedStyles.indexOf('grey') !== -1)) {
-			ansiStyles.dim.open = '';
-		}
-	
-		while (i--) {
-			var code = ansiStyles[nestedStyles[i]];
-	
-			// Replace any instances already present with a re-opening code
-			// otherwise only the part of the string until said closing code
-			// will be colored, and the rest will simply be 'plain'.
-			str = code.open + str.replace(code.closeRe, code.open) + code.close;
-		}
-	
-		// Reset the original 'dim' if we changed it to work around the Windows dimmed gray issue.
-		ansiStyles.dim.open = originalDim;
-	
-		return str;
-	}
-	
-	function init() {
-		var ret = {};
-	
-		Object.keys(styles).forEach(function (name) {
-			ret[name] = {
-				get: function () {
-					return build.call(this, [name]);
-				}
-			};
-		});
-	
-		return ret;
-	}
-	
-	defineProps(Chalk.prototype, init());
-	
-	module.exports = new Chalk();
-	module.exports.styles = ansiStyles;
-	module.exports.hasColor = hasAnsi;
-	module.exports.stripColor = stripAnsi;
-	module.exports.supportsColor = supportsColor;
-
-
-/***/ },
-/* 75 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
-	
-	module.exports = function (str) {
-		if (typeof str !== 'string') {
-			throw new TypeError('Expected a string');
-		}
-	
-		return str.replace(matchOperatorsRe, '\\$&');
-	};
-
-
-/***/ },
-/* 76 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(module) {'use strict';
-	
-	function assembleStyles () {
-		var styles = {
-			modifiers: {
-				reset: [0, 0],
-				bold: [1, 22], // 21 isn't widely supported and 22 does the same thing
-				dim: [2, 22],
-				italic: [3, 23],
-				underline: [4, 24],
-				inverse: [7, 27],
-				hidden: [8, 28],
-				strikethrough: [9, 29]
-			},
-			colors: {
-				black: [30, 39],
-				red: [31, 39],
-				green: [32, 39],
-				yellow: [33, 39],
-				blue: [34, 39],
-				magenta: [35, 39],
-				cyan: [36, 39],
-				white: [37, 39],
-				gray: [90, 39]
-			},
-			bgColors: {
-				bgBlack: [40, 49],
-				bgRed: [41, 49],
-				bgGreen: [42, 49],
-				bgYellow: [43, 49],
-				bgBlue: [44, 49],
-				bgMagenta: [45, 49],
-				bgCyan: [46, 49],
-				bgWhite: [47, 49]
-			}
-		};
-	
-		// fix humans
-		styles.colors.grey = styles.colors.gray;
-	
-		Object.keys(styles).forEach(function (groupName) {
-			var group = styles[groupName];
-	
-			Object.keys(group).forEach(function (styleName) {
-				var style = group[styleName];
-	
-				styles[styleName] = group[styleName] = {
-					open: '\u001b[' + style[0] + 'm',
-					close: '\u001b[' + style[1] + 'm'
-				};
-			});
-	
-			Object.defineProperty(styles, groupName, {
-				value: group,
-				enumerable: false
-			});
-		});
-	
-		return styles;
-	}
-	
-	Object.defineProperty(module, 'exports', {
-		enumerable: true,
-		get: assembleStyles
-	});
-	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(67)(module)))
-
-/***/ },
-/* 77 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	var ansiRegex = __webpack_require__(78)();
-	
-	module.exports = function (str) {
-		return typeof str === 'string' ? str.replace(ansiRegex, '') : str;
-	};
-
-
-/***/ },
-/* 78 */
-/***/ function(module, exports) {
-
-	'use strict';
-	module.exports = function () {
-		return /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
-	};
-
-
-/***/ },
-/* 79 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	var ansiRegex = __webpack_require__(78);
-	var re = new RegExp(ansiRegex().source); // remove the `g` flag
-	module.exports = re.test.bind(re);
-
-
-/***/ },
-/* 80 */
-/***/ function(module, exports) {
-
-	'use strict';
-	var argv = process.argv;
-	
-	var terminator = argv.indexOf('--');
-	var hasFlag = function (flag) {
-		flag = '--' + flag;
-		var pos = argv.indexOf(flag);
-		return pos !== -1 && (terminator !== -1 ? pos < terminator : true);
-	};
-	
-	module.exports = (function () {
-		if ('FORCE_COLOR' in process.env) {
-			return true;
-		}
-	
-		if (hasFlag('no-color') ||
-			hasFlag('no-colors') ||
-			hasFlag('color=false')) {
-			return false;
-		}
-	
-		if (hasFlag('color') ||
-			hasFlag('colors') ||
-			hasFlag('color=true') ||
-			hasFlag('color=always')) {
-			return true;
-		}
-	
-		if (process.stdout && !process.stdout.isTTY) {
-			return false;
-		}
-	
-		if (process.platform === 'win32') {
-			return true;
-		}
-	
-		if ('COLORTERM' in process.env) {
-			return true;
-		}
-	
-		if (process.env.TERM === 'dumb') {
-			return false;
-		}
-	
-		if (/^screen|^xterm|^vt100|color|ansi|cygwin|linux/i.test(process.env.TERM)) {
-			return true;
-		}
-	
-		return false;
-	})();
-
-
-/***/ },
-/* 81 */,
-/* 82 */
-/***/ function(module, exports) {
-
-
-
-/***/ },
-/* 83 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	const TemplateStore_1 = __webpack_require__(58);
-	const FileStore_1 = __webpack_require__(72);
-	const Logger_1 = __webpack_require__(73);
-	const Constants_1 = __webpack_require__(59);
-	const TypeMoq = __webpack_require__(84);
+	const TemplateStore_1 = __webpack_require__(59);
+	const FileStore_1 = __webpack_require__(62);
+	const DiskDbTemplateIndex_1 = __webpack_require__(74);
+	const Logger_1 = __webpack_require__(63);
+	const Constants_1 = __webpack_require__(61);
+	const TypeMoq = __webpack_require__(87);
 	describe("Template Store", () => {
 	    const config = {
 	        templateRootFolder: "root",
@@ -1616,12 +1659,13 @@
 	    const fileStoreMock = TypeMoq.Mock.ofInstance(fileStore);
 	    let store;
 	    const loggerMock = TypeMoq.Mock.ofType(Logger_1.Logger);
+	    const indexMock = TypeMoq.Mock.ofType(DiskDbTemplateIndex_1.DiskDbTemplateIndex);
 	    beforeEach(function () {
 	    });
 	    describe("#initialization", () => {
 	        beforeEach(function () {
 	            fileStoreMock.reset();
-	            store = new TemplateStore_1.TemplateStore(config, fileStoreMock.object, loggerMock.object);
+	            store = new TemplateStore_1.TemplateStore(indexMock.object, config, fileStoreMock.object, loggerMock.object);
 	        });
 	        it("Should check if the template folder in config exists", () => {
 	            fileStoreMock.setup(x => x.fileExists(TypeMoq.It.isAnyString()))
@@ -1664,7 +1708,7 @@
 
 
 /***/ },
-/* 84 */
+/* 87 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var TypeMoqIntern;
@@ -3046,7 +3090,7 @@
 	
 	
 	if (true) {
-	    var _ = __webpack_require__(85);
+	    var _ = __webpack_require__(88);
 	}
 	if (true) {
 	    if (typeof module !== "undefined" && module.exports) {
@@ -3064,7 +3108,7 @@
 
 
 /***/ },
-/* 85 */
+/* 88 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.8.3
