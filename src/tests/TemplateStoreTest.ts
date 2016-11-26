@@ -2,7 +2,7 @@ import { TemplateStore } from "../TemplateStore";
 import { FileStore } from "../FileStore";
 import { IFileStore, ILogger } from "../Interfaces";
 import { Logger } from "../Logger";
-import { INDEX_FILE_NAME } from "../Constants";
+import { INDEX_FOLDER_NAME } from "../Constants";
 import * as TypeMoq from "typemoq";
 
 describe("Template Store", () => {
@@ -38,7 +38,7 @@ describe("Template Store", () => {
                 fileStoreMock.verify(x => x.fileExists(TypeMoq.It.isValue(config.templateRootFolder)),
                     TypeMoq.Times.atLeastOnce());
 
-                fileStoreMock.verify(x => x.fileExists(TypeMoq.It.isValue(`${config.templateRootFolder}/${INDEX_FILE_NAME}`)),
+                fileStoreMock.verify(x => x.fileExists(TypeMoq.It.isValue(`${config.templateRootFolder}/${INDEX_FOLDER_NAME}`)),
                     TypeMoq.Times.atLeastOnce());
             });
         });

@@ -3,6 +3,14 @@ export interface ITemplateIndex {
 
 }
 
+export interface ITemplate {
+    name: string;
+    id: string;
+    type: string;
+    extension: string;
+    context: string;
+}
+
 export interface ITemplateStore {
     initialize(): Promise<void>;
     add(): void;
@@ -29,4 +37,8 @@ export interface ILogger {
     log(message: string): void;
     warn(message: string): void;
     error(message: string): void;
+}
+
+export interface ITemplateDatabase {
+
 }

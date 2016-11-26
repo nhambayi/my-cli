@@ -1,7 +1,10 @@
-export class Template {
+import {ITemplate} from "./Interfaces";
+
+export class Template implements ITemplate {
     id: string;
-    filename: string;
+    name: string;
     extension: string;
     type: string;
+    context: string;
 }
 

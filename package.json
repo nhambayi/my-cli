@@ -5,13 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --watch tmp/index-tests.js",
+    "start": "webpack --watch",
     "lint": "tslint --fix --force ./src/**/*.ts"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "diskdb": "^0.1.17",
     "karma": "^1.3.0",
-    "minimist": "^1.2.0",
     "mocha": "^3.1.2",
     "ts-loader": "^1.2.2",
     "tslint": "^4.0.1",
@@ -23,6 +24,7 @@
     "anyid": "^1.0.1",
     "chalk": "^1.1.3",
     "commander": "^2.9.0",
+    "easy-table": "^1.0.0",
     "fs": "0.0.1-security",
     "handlebars": "^4.0.6",
     "open": "0.0.5",

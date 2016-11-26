@@ -1,6 +1,7 @@
 import { ITemplateIndex, ITemplateStore, IFileStore, IApplicationConfiguration, ILogger } from "./Interfaces";
 import { SerializationHelper } from "./SerializationHelper";
-import { INDEX_FILE_NAME } from "./Constants";
+import { INDEX_FOLDER_NAME, TEMPLATES_COLLECTION_NAME } from "./Constants";
+import * as db from "diskdb";
 
 export class TemplateStore implements ITemplateStore {
 
@@ -14,25 +15,26 @@ export class TemplateStore implements ITemplateStore {
     fileStore: IFileStore;
     configuration: IApplicationConfiguration;
     logger: ILogger;
+    database: db.IDiskDb;
+    templateCollection: db.IDiskDbCollection;
+
 
     async initialize() {
         return new Promise<void>((resolve, reject) => {
             if (!this.fileStore.fileExists(this.configuration.templateRootFolder)) {
-                this.createRootFolder().then(() => {
-                    if (!this.fileStore.fileExists(`${this.configuration.templateRootFolder}/${INDEX_FILE_NAME}`)) {
-                        this.initiializeTemplateIndex().then(() => {
-                            resolve();
-                        });
-                    }
-                });
+                this.createFolder(this.configuration.templateRootFolder).then(() => {
+                    this.initiializeTemplateIndex().then(() => {
+                        resolve();
+                    }).catch((err) => { console.log(err); });
+                }).catch((err) => { console.log(err); });
             }
 
-            if (!this.fileStore.fileExists(`${this.configuration.templateRootFolder}/${INDEX_FILE_NAME}`)) {
-                this.initiializeTemplateIndex().then(() => {
-                    resolve();
-                });
-            }
+            this.initiializeTemplateIndex().then(() => {
+                resolve();
+            }).catch((err) => { console.log(err); });
+
         });
+
     }
 
     add(): void {
@@ -67,9 +69,9 @@ export class TemplateStore implements ITemplateStore {
         });
     }
 
-    private async createRootFolder() {
+    private async createFolder(path: string) {
         return new Promise<void>((resolve, reject) => {
-            this.fileStore.createFolder(this.configuration.templateRootFolder, (result, err) => {
+            this.fileStore.createFolder(path, (result, err) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -81,14 +83,16 @@ export class TemplateStore implements ITemplateStore {
 
     private async initiializeTemplateIndex() {
         return new Promise<void>((resolve, reject) => {
-            let template: string = "";
-            this.fileStore.saveFile(this.configuration.templateIndexPath, template, (result, err) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
+            if (!this.fileStore.fileExists(this.configuration.templateIndexPath)) {
+                this.createFolder(this.configuration.templateIndexPath).then(() => {
+                    this.database = db.connect(this.configuration.templateIndexPath);
+                    this.templateCollection = this.database.loadCollections([TEMPLATES_COLLECTION_NAME]);
+                });
+            } else {
+                this.database = db.connect(this.configuration.templateIndexPath);
+                this.database.loadCollections([TEMPLATES_COLLECTION_NAME]);
+                this.templateCollection = this.database[TEMPLATES_COLLECTION_NAME];
+            }
         });
     }
 }

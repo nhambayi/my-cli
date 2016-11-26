@@ -10,7 +10,7 @@ export class FileStore implements IFileStore {
     }
 
     saveFile(path: string, content: string, callback: (success: boolean, err: any) => void) {
-        fs.watchFile(path, content, (err) => {
+        fs.writeFile(path, content, (err) => {
             callback(false, err);
         });
     }

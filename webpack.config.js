@@ -2,7 +2,7 @@ module.exports = {
   target: "node",
   entry: {
     index: "./src/Index.ts",
-    list : "./src/commands/ListCommand",
+    list : "./src/commands/List/List",
     edit : "./src/commands/EditCommand",
     create : "./src/commands/CreateCommand",
     tests: "./src/Tests/IndexTest.ts"
