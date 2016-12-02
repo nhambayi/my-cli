@@ -45,15 +45,15 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	const minimist = __webpack_require__(7);
-	const fs = __webpack_require__(2);
-	const Template_1 = __webpack_require__(4);
-	const TemplateDatabase_1 = __webpack_require__(5);
-	const SerializationHelper_1 = __webpack_require__(3);
-	const handlebars_1 = __webpack_require__(8);
-	const program = __webpack_require__(38);
-	const openInEditor = __webpack_require__(43);
-	const crypto = __webpack_require__(6);
+	const minimist = __webpack_require__(37);
+	const fs = __webpack_require__(5);
+	const Template_1 = __webpack_require__(29);
+	const TemplateDatabase_1 = __webpack_require__(36);
+	const SerializationHelper_1 = __webpack_require__(35);
+	const handlebars_1 = __webpack_require__(38);
+	const program = __webpack_require__(31);
+	const openInEditor = __webpack_require__(68);
+	const crypto = __webpack_require__(27);
 	console.log("Welcome to TBD");
 	program
 	    .version("0.10.0")
@@ -62,7 +62,6 @@
 	    .command("list", "list all templates", { isDefault: true })
 	    .option("-t, --template", "template")
 	    .option("-o, --output", "output filename")
-	    .option("-f, --from", "template source file")
 	    .option("-c, --cheese [type]", "add the specified type of cheese [marble]", "marble")
 	    .parse(process.argv);
 	function getUserHome() {
@@ -77,7 +76,7 @@
 	    }
 	};
 	const args = minimist(process.argv.slice(2), parserOptions);
-	if (args["verbose"]) {
+	if (args["---verbose"]) {
 	    console.log(args);
 	}
 	let exists = fs.existsSync(args["templateFolder"]);
@@ -93,7 +92,7 @@
 	        }
 	    });
 	}
-	if (args["list"]) {
+	if (args["---list"]) {
 	    fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function (err, data) {
 	        if (err) {
 	            return console.log(err);
@@ -105,7 +104,7 @@
 	        }
 	    });
 	}
-	if (args["new"] === true) {
+	if (args["---new"] === true) {
 	    crypto.randomBytes(12, function (err, buffer) {
 	        const token = buffer.toString("hex");
 	        fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function (err, data) {
@@ -133,7 +132,7 @@
 	        });
 	    });
 	}
-	if (args["add"] === true) {
+	if (args["---add"] === true) {
 	    fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function (err, data) {
 	        if (err) {
 	            return console.log(err);
@@ -167,7 +166,7 @@
 	        }
 	    });
 	}
-	if (args["edit"] === true) {
+	if (args["---edit"] === true) {
 	    fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function (err, data) {
 	        if (err) {
 	            return console.log(err);
@@ -191,22 +190,1221 @@
 	        });
 	    });
 	}
-	if (args["help"] === true) {
+	if (args["---help"] === true) {
 	    console.log("Help Info");
 	}
-	if (args["error"] === true) {
+	if (args["---error"] === true) {
 	}
 
 
 /***/ },
 /* 1 */,
-/* 2 */
+/* 2 */,
+/* 3 */,
+/* 4 */,
+/* 5 */
 /***/ function(module, exports) {
 
 	module.exports = require("fs");
 
 /***/ },
-/* 3 */
+/* 6 */,
+/* 7 */,
+/* 8 */,
+/* 9 */,
+/* 10 */,
+/* 11 */,
+/* 12 */,
+/* 13 */,
+/* 14 */,
+/* 15 */,
+/* 16 */,
+/* 17 */
+/***/ function(module, exports) {
+
+	module.exports = require("path");
+
+/***/ },
+/* 18 */,
+/* 19 */,
+/* 20 */,
+/* 21 */,
+/* 22 */,
+/* 23 */,
+/* 24 */,
+/* 25 */,
+/* 26 */,
+/* 27 */
+/***/ function(module, exports) {
+
+	module.exports = require("crypto");
+
+/***/ },
+/* 28 */,
+/* 29 */
+/***/ function(module, exports) {
+
+	"use strict";
+	class Template {
+	    get id() {
+	        return this._id;
+	    }
+	    set id(value) {
+	        this._id = value;
+	    }
+	}
+	exports.Template = Template;
+
+
+/***/ },
+/* 30 */,
+/* 31 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Module dependencies.
+	 */
+	
+	var EventEmitter = __webpack_require__(32).EventEmitter;
+	var spawn = __webpack_require__(33).spawn;
+	var readlink = __webpack_require__(34).readlinkSync;
+	var path = __webpack_require__(17);
+	var dirname = path.dirname;
+	var basename = path.basename;
+	var fs = __webpack_require__(5);
+	
+	/**
+	 * Expose the root command.
+	 */
+	
+	exports = module.exports = new Command();
+	
+	/**
+	 * Expose `Command`.
+	 */
+	
+	exports.Command = Command;
+	
+	/**
+	 * Expose `Option`.
+	 */
+	
+	exports.Option = Option;
+	
+	/**
+	 * Initialize a new `Option` with the given `flags` and `description`.
+	 *
+	 * @param {String} flags
+	 * @param {String} description
+	 * @api public
+	 */
+	
+	function Option(flags, description) {
+	  this.flags = flags;
+	  this.required = ~flags.indexOf('<');
+	  this.optional = ~flags.indexOf('[');
+	  this.bool = !~flags.indexOf('-no-');
+	  flags = flags.split(/[ ,|]+/);
+	  if (flags.length > 1 && !/^[[<]/.test(flags[1])) this.short = flags.shift();
+	  this.long = flags.shift();
+	  this.description = description || '';
+	}
+	
+	/**
+	 * Return option name.
+	 *
+	 * @return {String}
+	 * @api private
+	 */
+	
+	Option.prototype.name = function() {
+	  return this.long
+	    .replace('--', '')
+	    .replace('no-', '');
+	};
+	
+	/**
+	 * Check if `arg` matches the short or long flag.
+	 *
+	 * @param {String} arg
+	 * @return {Boolean}
+	 * @api private
+	 */
+	
+	Option.prototype.is = function(arg) {
+	  return arg == this.short || arg == this.long;
+	};
+	
+	/**
+	 * Initialize a new `Command`.
+	 *
+	 * @param {String} name
+	 * @api public
+	 */
+	
+	function Command(name) {
+	  this.commands = [];
+	  this.options = [];
+	  this._execs = {};
+	  this._allowUnknownOption = false;
+	  this._args = [];
+	  this._name = name || '';
+	}
+	
+	/**
+	 * Inherit from `EventEmitter.prototype`.
+	 */
+	
+	Command.prototype.__proto__ = EventEmitter.prototype;
+	
+	/**
+	 * Add command `name`.
+	 *
+	 * The `.action()` callback is invoked when the
+	 * command `name` is specified via __ARGV__,
+	 * and the remaining arguments are applied to the
+	 * function for access.
+	 *
+	 * When the `name` is "*" an un-matched command
+	 * will be passed as the first arg, followed by
+	 * the rest of __ARGV__ remaining.
+	 *
+	 * Examples:
+	 *
+	 *      program
+	 *        .version('0.0.1')
+	 *        .option('-C, --chdir <path>', 'change the working directory')
+	 *        .option('-c, --config <path>', 'set config path. defaults to ./deploy.conf')
+	 *        .option('-T, --no-tests', 'ignore test hook')
+	 *
+	 *      program
+	 *        .command('setup')
+	 *        .description('run remote setup commands')
+	 *        .action(function() {
+	 *          console.log('setup');
+	 *        });
+	 *
+	 *      program
+	 *        .command('exec <cmd>')
+	 *        .description('run the given remote command')
+	 *        .action(function(cmd) {
+	 *          console.log('exec "%s"', cmd);
+	 *        });
+	 *
+	 *      program
+	 *        .command('teardown <dir> [otherDirs...]')
+	 *        .description('run teardown commands')
+	 *        .action(function(dir, otherDirs) {
+	 *          console.log('dir "%s"', dir);
+	 *          if (otherDirs) {
+	 *            otherDirs.forEach(function (oDir) {
+	 *              console.log('dir "%s"', oDir);
+	 *            });
+	 *          }
+	 *        });
+	 *
+	 *      program
+	 *        .command('*')
+	 *        .description('deploy the given env')
+	 *        .action(function(env) {
+	 *          console.log('deploying "%s"', env);
+	 *        });
+	 *
+	 *      program.parse(process.argv);
+	  *
+	 * @param {String} name
+	 * @param {String} [desc] for git-style sub-commands
+	 * @return {Command} the new command
+	 * @api public
+	 */
+	
+	Command.prototype.command = function(name, desc, opts) {
+	  opts = opts || {};
+	  var args = name.split(/ +/);
+	  var cmd = new Command(args.shift());
+	
+	  if (desc) {
+	    cmd.description(desc);
+	    this.executables = true;
+	    this._execs[cmd._name] = true;
+	    if (opts.isDefault) this.defaultExecutable = cmd._name;
+	  }
+	
+	  cmd._noHelp = !!opts.noHelp;
+	  this.commands.push(cmd);
+	  cmd.parseExpectedArgs(args);
+	  cmd.parent = this;
+	
+	  if (desc) return this;
+	  return cmd;
+	};
+	
+	/**
+	 * Define argument syntax for the top-level command.
+	 *
+	 * @api public
+	 */
+	
+	Command.prototype.arguments = function (desc) {
+	  return this.parseExpectedArgs(desc.split(/ +/));
+	};
+	
+	/**
+	 * Add an implicit `help [cmd]` subcommand
+	 * which invokes `--help` for the given command.
+	 *
+	 * @api private
+	 */
+	
+	Command.prototype.addImplicitHelpCommand = function() {
+	  this.command('help [cmd]', 'display help for [cmd]');
+	};
+	
+	/**
+	 * Parse expected `args`.
+	 *
+	 * For example `["[type]"]` becomes `[{ required: false, name: 'type' }]`.
+	 *
+	 * @param {Array} args
+	 * @return {Command} for chaining
+	 * @api public
+	 */
+	
+	Command.prototype.parseExpectedArgs = function(args) {
+	  if (!args.length) return;
+	  var self = this;
+	  args.forEach(function(arg) {
+	    var argDetails = {
+	      required: false,
+	      name: '',
+	      variadic: false
+	    };
+	
+	    switch (arg[0]) {
+	      case '<':
+	        argDetails.required = true;
+	        argDetails.name = arg.slice(1, -1);
+	        break;
+	      case '[':
+	        argDetails.name = arg.slice(1, -1);
+	        break;
+	    }
+	
+	    if (argDetails.name.length > 3 && argDetails.name.slice(-3) === '...') {
+	      argDetails.variadic = true;
+	      argDetails.name = argDetails.name.slice(0, -3);
+	    }
+	    if (argDetails.name) {
+	      self._args.push(argDetails);
+	    }
+	  });
+	  return this;
+	};
+	
+	/**
+	 * Register callback `fn` for the command.
+	 *
+	 * Examples:
+	 *
+	 *      program
+	 *        .command('help')
+	 *        .description('display verbose help')
+	 *        .action(function() {
+	 *           // output help here
+	 *        });
+	 *
+	 * @param {Function} fn
+	 * @return {Command} for chaining
+	 * @api public
+	 */
+	
+	Command.prototype.action = function(fn) {
+	  var self = this;
+	  var listener = function(args, unknown) {
+	    // Parse any so-far unknown options
+	    args = args || [];
+	    unknown = unknown || [];
+	
+	    var parsed = self.parseOptions(unknown);
+	
+	    // Output help if necessary
+	    outputHelpIfNecessary(self, parsed.unknown);
+	
+	    // If there are still any unknown options, then we simply
+	    // die, unless someone asked for help, in which case we give it
+	    // to them, and then we die.
+	    if (parsed.unknown.length > 0) {
+	      self.unknownOption(parsed.unknown[0]);
+	    }
+	
+	    // Leftover arguments need to be pushed back. Fixes issue #56
+	    if (parsed.args.length) args = parsed.args.concat(args);
+	
+	    self._args.forEach(function(arg, i) {
+	      if (arg.required && null == args[i]) {
+	        self.missingArgument(arg.name);
+	      } else if (arg.variadic) {
+	        if (i !== self._args.length - 1) {
+	          self.variadicArgNotLast(arg.name);
+	        }
+	
+	        args[i] = args.splice(i);
+	      }
+	    });
+	
+	    // Always append ourselves to the end of the arguments,
+	    // to make sure we match the number of arguments the user
+	    // expects
+	    if (self._args.length) {
+	      args[self._args.length] = self;
+	    } else {
+	      args.push(self);
+	    }
+	
+	    fn.apply(self, args);
+	  };
+	  var parent = this.parent || this;
+	  var name = parent === this ? '*' : this._name;
+	  parent.on(name, listener);
+	  if (this._alias) parent.on(this._alias, listener);
+	  return this;
+	};
+	
+	/**
+	 * Define option with `flags`, `description` and optional
+	 * coercion `fn`.
+	 *
+	 * The `flags` string should contain both the short and long flags,
+	 * separated by comma, a pipe or space. The following are all valid
+	 * all will output this way when `--help` is used.
+	 *
+	 *    "-p, --pepper"
+	 *    "-p|--pepper"
+	 *    "-p --pepper"
+	 *
+	 * Examples:
+	 *
+	 *     // simple boolean defaulting to false
+	 *     program.option('-p, --pepper', 'add pepper');
+	 *
+	 *     --pepper
+	 *     program.pepper
+	 *     // => Boolean
+	 *
+	 *     // simple boolean defaulting to true
+	 *     program.option('-C, --no-cheese', 'remove cheese');
+	 *
+	 *     program.cheese
+	 *     // => true
+	 *
+	 *     --no-cheese
+	 *     program.cheese
+	 *     // => false
+	 *
+	 *     // required argument
+	 *     program.option('-C, --chdir <path>', 'change the working directory');
+	 *
+	 *     --chdir /tmp
+	 *     program.chdir
+	 *     // => "/tmp"
+	 *
+	 *     // optional argument
+	 *     program.option('-c, --cheese [type]', 'add cheese [marble]');
+	 *
+	 * @param {String} flags
+	 * @param {String} description
+	 * @param {Function|Mixed} fn or default
+	 * @param {Mixed} defaultValue
+	 * @return {Command} for chaining
+	 * @api public
+	 */
+	
+	Command.prototype.option = function(flags, description, fn, defaultValue) {
+	  var self = this
+	    , option = new Option(flags, description)
+	    , oname = option.name()
+	    , name = camelcase(oname);
+	
+	  // default as 3rd arg
+	  if (typeof fn != 'function') {
+	    if (fn instanceof RegExp) {
+	      var regex = fn;
+	      fn = function(val, def) {
+	        var m = regex.exec(val);
+	        return m ? m[0] : def;
+	      }
+	    }
+	    else {
+	      defaultValue = fn;
+	      fn = null;
+	    }
+	  }
+	
+	  // preassign default value only for --no-*, [optional], or <required>
+	  if (false == option.bool || option.optional || option.required) {
+	    // when --no-* we make sure default is true
+	    if (false == option.bool) defaultValue = true;
+	    // preassign only if we have a default
+	    if (undefined !== defaultValue) self[name] = defaultValue;
+	  }
+	
+	  // register the option
+	  this.options.push(option);
+	
+	  // when it's passed assign the value
+	  // and conditionally invoke the callback
+	  this.on(oname, function(val) {
+	    // coercion
+	    if (null !== val && fn) val = fn(val, undefined === self[name]
+	      ? defaultValue
+	      : self[name]);
+	
+	    // unassigned or bool
+	    if ('boolean' == typeof self[name] || 'undefined' == typeof self[name]) {
+	      // if no value, bool true, and we have a default, then use it!
+	      if (null == val) {
+	        self[name] = option.bool
+	          ? defaultValue || true
+	          : false;
+	      } else {
+	        self[name] = val;
+	      }
+	    } else if (null !== val) {
+	      // reassign
+	      self[name] = val;
+	    }
+	  });
+	
+	  return this;
+	};
+	
+	/**
+	 * Allow unknown options on the command line.
+	 *
+	 * @param {Boolean} arg if `true` or omitted, no error will be thrown
+	 * for unknown options.
+	 * @api public
+	 */
+	Command.prototype.allowUnknownOption = function(arg) {
+	    this._allowUnknownOption = arguments.length === 0 || arg;
+	    return this;
+	};
+	
+	/**
+	 * Parse `argv`, settings options and invoking commands when defined.
+	 *
+	 * @param {Array} argv
+	 * @return {Command} for chaining
+	 * @api public
+	 */
+	
+	Command.prototype.parse = function(argv) {
+	  // implicit help
+	  if (this.executables) this.addImplicitHelpCommand();
+	
+	  // store raw args
+	  this.rawArgs = argv;
+	
+	  // guess name
+	  this._name = this._name || basename(argv[1], '.js');
+	
+	  // github-style sub-commands with no sub-command
+	  if (this.executables && argv.length < 3 && !this.defaultExecutable) {
+	    // this user needs help
+	    argv.push('--help');
+	  }
+	
+	  // process argv
+	  var parsed = this.parseOptions(this.normalize(argv.slice(2)));
+	  var args = this.args = parsed.args;
+	
+	  var result = this.parseArgs(this.args, parsed.unknown);
+	
+	  // executable sub-commands
+	  var name = result.args[0];
+	  if (this._execs[name] && typeof this._execs[name] != "function") {
+	    return this.executeSubCommand(argv, args, parsed.unknown);
+	  } else if (this.defaultExecutable) {
+	    // use the default subcommand
+	    args.unshift(name = this.defaultExecutable);
+	    return this.executeSubCommand(argv, args, parsed.unknown);
+	  }
+	
+	  return result;
+	};
+	
+	/**
+	 * Execute a sub-command executable.
+	 *
+	 * @param {Array} argv
+	 * @param {Array} args
+	 * @param {Array} unknown
+	 * @api private
+	 */
+	
+	Command.prototype.executeSubCommand = function(argv, args, unknown) {
+	  args = args.concat(unknown);
+	
+	  if (!args.length) this.help();
+	  if ('help' == args[0] && 1 == args.length) this.help();
+	
+	  // <cmd> --help
+	  if ('help' == args[0]) {
+	    args[0] = args[1];
+	    args[1] = '--help';
+	  }
+	
+	  // executable
+	  var f = argv[1];
+	  // name of the subcommand, link `pm-install`
+	  var bin = basename(f, '.js') + '-' + args[0];
+	
+	
+	  // In case of globally installed, get the base dir where executable
+	  //  subcommand file should be located at
+	  var baseDir
+	    , link = readlink(f);
+	
+	  // when symbolink is relative path
+	  if (link !== f && link.charAt(0) !== '/') {
+	    link = path.join(dirname(f), link)
+	  }
+	  baseDir = dirname(link);
+	
+	  // prefer local `./<bin>` to bin in the $PATH
+	  var localBin = path.join(baseDir, bin);
+	
+	  // whether bin file is a js script with explicit `.js` extension
+	  var isExplicitJS = false;
+	  if (exists(localBin + '.js')) {
+	    bin = localBin + '.js';
+	    isExplicitJS = true;
+	  } else if (exists(localBin)) {
+	    bin = localBin;
+	  }
+	
+	  args = args.slice(1);
+	
+	  var proc;
+	  if (process.platform !== 'win32') {
+	    if (isExplicitJS) {
+	      args.unshift(localBin);
+	      // add executable arguments to spawn
+	      args = (process.execArgv || []).concat(args);
+	
+	      proc = spawn('node', args, { stdio: 'inherit', customFds: [0, 1, 2] });
+	    } else {
+	      proc = spawn(bin, args, { stdio: 'inherit', customFds: [0, 1, 2] });
+	    }
+	  } else {
+	    args.unshift(localBin);
+	    proc = spawn(process.execPath, args, { stdio: 'inherit'});
+	  }
+	
+	  proc.on('close', process.exit.bind(process));
+	  proc.on('error', function(err) {
+	    if (err.code == "ENOENT") {
+	      console.error('\n  %s(1) does not exist, try --help\n', bin);
+	    } else if (err.code == "EACCES") {
+	      console.error('\n  %s(1) not executable. try chmod or run with root\n', bin);
+	    }
+	    process.exit(1);
+	  });
+	
+	  // Store the reference to the child process
+	  this.runningCommand = proc;
+	};
+	
+	/**
+	 * Normalize `args`, splitting joined short flags. For example
+	 * the arg "-abc" is equivalent to "-a -b -c".
+	 * This also normalizes equal sign and splits "--abc=def" into "--abc def".
+	 *
+	 * @param {Array} args
+	 * @return {Array}
+	 * @api private
+	 */
+	
+	Command.prototype.normalize = function(args) {
+	  var ret = []
+	    , arg
+	    , lastOpt
+	    , index;
+	
+	  for (var i = 0, len = args.length; i < len; ++i) {
+	    arg = args[i];
+	    if (i > 0) {
+	      lastOpt = this.optionFor(args[i-1]);
+	    }
+	
+	    if (arg === '--') {
+	      // Honor option terminator
+	      ret = ret.concat(args.slice(i));
+	      break;
+	    } else if (lastOpt && lastOpt.required) {
+	      ret.push(arg);
+	    } else if (arg.length > 1 && '-' == arg[0] && '-' != arg[1]) {
+	      arg.slice(1).split('').forEach(function(c) {
+	        ret.push('-' + c);
+	      });
+	    } else if (/^--/.test(arg) && ~(index = arg.indexOf('='))) {
+	      ret.push(arg.slice(0, index), arg.slice(index + 1));
+	    } else {
+	      ret.push(arg);
+	    }
+	  }
+	
+	  return ret;
+	};
+	
+	/**
+	 * Parse command `args`.
+	 *
+	 * When listener(s) are available those
+	 * callbacks are invoked, otherwise the "*"
+	 * event is emitted and those actions are invoked.
+	 *
+	 * @param {Array} args
+	 * @return {Command} for chaining
+	 * @api private
+	 */
+	
+	Command.prototype.parseArgs = function(args, unknown) {
+	  var name;
+	
+	  if (args.length) {
+	    name = args[0];
+	    if (this.listeners(name).length) {
+	      this.emit(args.shift(), args, unknown);
+	    } else {
+	      this.emit('*', args);
+	    }
+	  } else {
+	    outputHelpIfNecessary(this, unknown);
+	
+	    // If there were no args and we have unknown options,
+	    // then they are extraneous and we need to error.
+	    if (unknown.length > 0) {
+	      this.unknownOption(unknown[0]);
+	    }
+	  }
+	
+	  return this;
+	};
+	
+	/**
+	 * Return an option matching `arg` if any.
+	 *
+	 * @param {String} arg
+	 * @return {Option}
+	 * @api private
+	 */
+	
+	Command.prototype.optionFor = function(arg) {
+	  for (var i = 0, len = this.options.length; i < len; ++i) {
+	    if (this.options[i].is(arg)) {
+	      return this.options[i];
+	    }
+	  }
+	};
+	
+	/**
+	 * Parse options from `argv` returning `argv`
+	 * void of these options.
+	 *
+	 * @param {Array} argv
+	 * @return {Array}
+	 * @api public
+	 */
+	
+	Command.prototype.parseOptions = function(argv) {
+	  var args = []
+	    , len = argv.length
+	    , literal
+	    , option
+	    , arg;
+	
+	  var unknownOptions = [];
+	
+	  // parse options
+	  for (var i = 0; i < len; ++i) {
+	    arg = argv[i];
+	
+	    // literal args after --
+	    if ('--' == arg) {
+	      literal = true;
+	      continue;
+	    }
+	
+	    if (literal) {
+	      args.push(arg);
+	      continue;
+	    }
+	
+	    // find matching Option
+	    option = this.optionFor(arg);
+	
+	    // option is defined
+	    if (option) {
+	      // requires arg
+	      if (option.required) {
+	        arg = argv[++i];
+	        if (null == arg) return this.optionMissingArgument(option);
+	        this.emit(option.name(), arg);
+	      // optional arg
+	      } else if (option.optional) {
+	        arg = argv[i+1];
+	        if (null == arg || ('-' == arg[0] && '-' != arg)) {
+	          arg = null;
+	        } else {
+	          ++i;
+	        }
+	        this.emit(option.name(), arg);
+	      // bool
+	      } else {
+	        this.emit(option.name());
+	      }
+	      continue;
+	    }
+	
+	    // looks like an option
+	    if (arg.length > 1 && '-' == arg[0]) {
+	      unknownOptions.push(arg);
+	
+	      // If the next argument looks like it might be
+	      // an argument for this option, we pass it on.
+	      // If it isn't, then it'll simply be ignored
+	      if (argv[i+1] && '-' != argv[i+1][0]) {
+	        unknownOptions.push(argv[++i]);
+	      }
+	      continue;
+	    }
+	
+	    // arg
+	    args.push(arg);
+	  }
+	
+	  return { args: args, unknown: unknownOptions };
+	};
+	
+	/**
+	 * Return an object containing options as key-value pairs
+	 *
+	 * @return {Object}
+	 * @api public
+	 */
+	Command.prototype.opts = function() {
+	  var result = {}
+	    , len = this.options.length;
+	
+	  for (var i = 0 ; i < len; i++) {
+	    var key = camelcase(this.options[i].name());
+	    result[key] = key === 'version' ? this._version : this[key];
+	  }
+	  return result;
+	};
+	
+	/**
+	 * Argument `name` is missing.
+	 *
+	 * @param {String} name
+	 * @api private
+	 */
+	
+	Command.prototype.missingArgument = function(name) {
+	  console.error();
+	  console.error("  error: missing required argument `%s'", name);
+	  console.error();
+	  process.exit(1);
+	};
+	
+	/**
+	 * `Option` is missing an argument, but received `flag` or nothing.
+	 *
+	 * @param {String} option
+	 * @param {String} flag
+	 * @api private
+	 */
+	
+	Command.prototype.optionMissingArgument = function(option, flag) {
+	  console.error();
+	  if (flag) {
+	    console.error("  error: option `%s' argument missing, got `%s'", option.flags, flag);
+	  } else {
+	    console.error("  error: option `%s' argument missing", option.flags);
+	  }
+	  console.error();
+	  process.exit(1);
+	};
+	
+	/**
+	 * Unknown option `flag`.
+	 *
+	 * @param {String} flag
+	 * @api private
+	 */
+	
+	Command.prototype.unknownOption = function(flag) {
+	  if (this._allowUnknownOption) return;
+	  console.error();
+	  console.error("  error: unknown option `%s'", flag);
+	  console.error();
+	  process.exit(1);
+	};
+	
+	/**
+	 * Variadic argument with `name` is not the last argument as required.
+	 *
+	 * @param {String} name
+	 * @api private
+	 */
+	
+	Command.prototype.variadicArgNotLast = function(name) {
+	  console.error();
+	  console.error("  error: variadic arguments must be last `%s'", name);
+	  console.error();
+	  process.exit(1);
+	};
+	
+	/**
+	 * Set the program version to `str`.
+	 *
+	 * This method auto-registers the "-V, --version" flag
+	 * which will print the version number when passed.
+	 *
+	 * @param {String} str
+	 * @param {String} flags
+	 * @return {Command} for chaining
+	 * @api public
+	 */
+	
+	Command.prototype.version = function(str, flags) {
+	  if (0 == arguments.length) return this._version;
+	  this._version = str;
+	  flags = flags || '-V, --version';
+	  this.option(flags, 'output the version number');
+	  this.on('version', function() {
+	    process.stdout.write(str + '\n');
+	    process.exit(0);
+	  });
+	  return this;
+	};
+	
+	/**
+	 * Set the description to `str`.
+	 *
+	 * @param {String} str
+	 * @return {String|Command}
+	 * @api public
+	 */
+	
+	Command.prototype.description = function(str) {
+	  if (0 === arguments.length) return this._description;
+	  this._description = str;
+	  return this;
+	};
+	
+	/**
+	 * Set an alias for the command
+	 *
+	 * @param {String} alias
+	 * @return {String|Command}
+	 * @api public
+	 */
+	
+	Command.prototype.alias = function(alias) {
+	  if (0 == arguments.length) return this._alias;
+	  this._alias = alias;
+	  return this;
+	};
+	
+	/**
+	 * Set / get the command usage `str`.
+	 *
+	 * @param {String} str
+	 * @return {String|Command}
+	 * @api public
+	 */
+	
+	Command.prototype.usage = function(str) {
+	  var args = this._args.map(function(arg) {
+	    return humanReadableArgName(arg);
+	  });
+	
+	  var usage = '[options]'
+	    + (this.commands.length ? ' [command]' : '')
+	    + (this._args.length ? ' ' + args.join(' ') : '');
+	
+	  if (0 == arguments.length) return this._usage || usage;
+	  this._usage = str;
+	
+	  return this;
+	};
+	
+	/**
+	 * Get the name of the command
+	 *
+	 * @param {String} name
+	 * @return {String|Command}
+	 * @api public
+	 */
+	
+	Command.prototype.name = function() {
+	  return this._name;
+	};
+	
+	/**
+	 * Return the largest option length.
+	 *
+	 * @return {Number}
+	 * @api private
+	 */
+	
+	Command.prototype.largestOptionLength = function() {
+	  return this.options.reduce(function(max, option) {
+	    return Math.max(max, option.flags.length);
+	  }, 0);
+	};
+	
+	/**
+	 * Return help for options.
+	 *
+	 * @return {String}
+	 * @api private
+	 */
+	
+	Command.prototype.optionHelp = function() {
+	  var width = this.largestOptionLength();
+	
+	  // Prepend the help information
+	  return [pad('-h, --help', width) + '  ' + 'output usage information']
+	      .concat(this.options.map(function(option) {
+	        return pad(option.flags, width) + '  ' + option.description;
+	      }))
+	      .join('\n');
+	};
+	
+	/**
+	 * Return command help documentation.
+	 *
+	 * @return {String}
+	 * @api private
+	 */
+	
+	Command.prototype.commandHelp = function() {
+	  if (!this.commands.length) return '';
+	
+	  var commands = this.commands.filter(function(cmd) {
+	    return !cmd._noHelp;
+	  }).map(function(cmd) {
+	    var args = cmd._args.map(function(arg) {
+	      return humanReadableArgName(arg);
+	    }).join(' ');
+	
+	    return [
+	      cmd._name
+	        + (cmd._alias ? '|' + cmd._alias : '')
+	        + (cmd.options.length ? ' [options]' : '')
+	        + ' ' + args
+	      , cmd.description()
+	    ];
+	  });
+	
+	  var width = commands.reduce(function(max, command) {
+	    return Math.max(max, command[0].length);
+	  }, 0);
+	
+	  return [
+	    ''
+	    , '  Commands:'
+	    , ''
+	    , commands.map(function(cmd) {
+	      var desc = cmd[1] ? '  ' + cmd[1] : '';
+	      return pad(cmd[0], width) + desc;
+	    }).join('\n').replace(/^/gm, '    ')
+	    , ''
+	  ].join('\n');
+	};
+	
+	/**
+	 * Return program help documentation.
+	 *
+	 * @return {String}
+	 * @api private
+	 */
+	
+	Command.prototype.helpInformation = function() {
+	  var desc = [];
+	  if (this._description) {
+	    desc = [
+	      '  ' + this._description
+	      , ''
+	    ];
+	  }
+	
+	  var cmdName = this._name;
+	  if (this._alias) {
+	    cmdName = cmdName + '|' + this._alias;
+	  }
+	  var usage = [
+	    ''
+	    ,'  Usage: ' + cmdName + ' ' + this.usage()
+	    , ''
+	  ];
+	
+	  var cmds = [];
+	  var commandHelp = this.commandHelp();
+	  if (commandHelp) cmds = [commandHelp];
+	
+	  var options = [
+	    '  Options:'
+	    , ''
+	    , '' + this.optionHelp().replace(/^/gm, '    ')
+	    , ''
+	    , ''
+	  ];
+	
+	  return usage
+	    .concat(cmds)
+	    .concat(desc)
+	    .concat(options)
+	    .join('\n');
+	};
+	
+	/**
+	 * Output help information for this command
+	 *
+	 * @api public
+	 */
+	
+	Command.prototype.outputHelp = function(cb) {
+	  if (!cb) {
+	    cb = function(passthru) {
+	      return passthru;
+	    }
+	  }
+	  process.stdout.write(cb(this.helpInformation()));
+	  this.emit('--help');
+	};
+	
+	/**
+	 * Output help information and exit.
+	 *
+	 * @api public
+	 */
+	
+	Command.prototype.help = function(cb) {
+	  this.outputHelp(cb);
+	  process.exit();
+	};
+	
+	/**
+	 * Camel-case the given `flag`
+	 *
+	 * @param {String} flag
+	 * @return {String}
+	 * @api private
+	 */
+	
+	function camelcase(flag) {
+	  return flag.split('-').reduce(function(str, word) {
+	    return str + word[0].toUpperCase() + word.slice(1);
+	  });
+	}
+	
+	/**
+	 * Pad `str` to `width`.
+	 *
+	 * @param {String} str
+	 * @param {Number} width
+	 * @return {String}
+	 * @api private
+	 */
+	
+	function pad(str, width) {
+	  var len = Math.max(0, width - str.length);
+	  return str + Array(len + 1).join(' ');
+	}
+	
+	/**
+	 * Output help information if necessary
+	 *
+	 * @param {Command} command to output help for
+	 * @param {Array} array of options to search for -h or --help
+	 * @api private
+	 */
+	
+	function outputHelpIfNecessary(cmd, options) {
+	  options = options || [];
+	  for (var i = 0; i < options.length; i++) {
+	    if (options[i] == '--help' || options[i] == '-h') {
+	      cmd.outputHelp();
+	      process.exit(0);
+	    }
+	  }
+	}
+	
+	/**
+	 * Takes an argument an returns its human readable equivalent for help usage.
+	 *
+	 * @param {Object} arg
+	 * @return {String}
+	 * @api private
+	 */
+	
+	function humanReadableArgName(arg) {
+	  var nameOutput = arg.name + (arg.variadic === true ? '...' : '');
+	
+	  return arg.required
+	    ? '<' + nameOutput + '>'
+	    : '[' + nameOutput + ']'
+	}
+	
+	// for versions before node v0.8 when there weren't `fs.existsSync`
+	function exists(file) {
+	  try {
+	    if (fs.statSync(file).isFile()) {
+	      return true;
+	    }
+	  } catch (e) {
+	    return false;
+	  }
+	}
+	
+
+
+/***/ },
+/* 32 */
+/***/ function(module, exports) {
+
+	module.exports = require("events");
+
+/***/ },
+/* 33 */
+/***/ function(module, exports) {
+
+	module.exports = require("child_process");
+
+/***/ },
+/* 34 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var fs = __webpack_require__(5)
+	  , lstat = fs.lstatSync;
+	
+	exports.readlinkSync = function (p) {
+	  if (lstat(p).isSymbolicLink()) {
+	    return fs.readlinkSync(p);
+	  } else {
+	    return p;
+	  }
+	};
+	
+	
+
+
+/***/ },
+/* 35 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -228,23 +1426,7 @@
 
 
 /***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	"use strict";
-	class Template {
-	    get id() {
-	        return this._id;
-	    }
-	    set id(value) {
-	        this._id = value;
-	    }
-	}
-	exports.Template = Template;
-
-
-/***/ },
-/* 5 */
+/* 36 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -256,13 +1438,7 @@
 
 
 /***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	module.exports = require("crypto");
-
-/***/ },
-/* 7 */
+/* 37 */
 /***/ function(module, exports) {
 
 	module.exports = function (args, opts) {
@@ -504,7 +1680,7 @@
 
 
 /***/ },
-/* 8 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// USAGE:
@@ -513,9 +1689,9 @@
 	
 	// var local = handlebars.create();
 	
-	var handlebars = __webpack_require__(9)['default'];
+	var handlebars = __webpack_require__(39)['default'];
 	
-	var printer = __webpack_require__(37);
+	var printer = __webpack_require__(67);
 	handlebars.PrintVisitor = printer.PrintVisitor;
 	handlebars.print = printer.print;
 	
@@ -523,7 +1699,7 @@
 	
 	// Publish a Node.js require() handler for .handlebars and .hbs files
 	function extension(module, filename) {
-	  var fs = __webpack_require__(2);
+	  var fs = __webpack_require__(5);
 	  var templateString = fs.readFileSync(filename, 'utf8');
 	  module.exports = handlebars.compile(templateString);
 	}
@@ -535,7 +1711,7 @@
 
 
 /***/ },
-/* 9 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -545,29 +1721,29 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _handlebarsRuntime = __webpack_require__(10);
+	var _handlebarsRuntime = __webpack_require__(40);
 	
 	var _handlebarsRuntime2 = _interopRequireDefault(_handlebarsRuntime);
 	
 	// Compiler imports
 	
-	var _handlebarsCompilerAst = __webpack_require__(28);
+	var _handlebarsCompilerAst = __webpack_require__(58);
 	
 	var _handlebarsCompilerAst2 = _interopRequireDefault(_handlebarsCompilerAst);
 	
-	var _handlebarsCompilerBase = __webpack_require__(29);
+	var _handlebarsCompilerBase = __webpack_require__(59);
 	
-	var _handlebarsCompilerCompiler = __webpack_require__(34);
+	var _handlebarsCompilerCompiler = __webpack_require__(64);
 	
-	var _handlebarsCompilerJavascriptCompiler = __webpack_require__(35);
+	var _handlebarsCompilerJavascriptCompiler = __webpack_require__(65);
 	
 	var _handlebarsCompilerJavascriptCompiler2 = _interopRequireDefault(_handlebarsCompilerJavascriptCompiler);
 	
-	var _handlebarsCompilerVisitor = __webpack_require__(32);
+	var _handlebarsCompilerVisitor = __webpack_require__(62);
 	
 	var _handlebarsCompilerVisitor2 = _interopRequireDefault(_handlebarsCompilerVisitor);
 	
-	var _handlebarsNoConflict = __webpack_require__(27);
+	var _handlebarsNoConflict = __webpack_require__(57);
 	
 	var _handlebarsNoConflict2 = _interopRequireDefault(_handlebarsNoConflict);
 	
@@ -606,7 +1782,7 @@
 
 
 /***/ },
-/* 10 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -620,30 +1796,30 @@
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
 	
-	var _handlebarsBase = __webpack_require__(11);
+	var _handlebarsBase = __webpack_require__(41);
 	
 	var base = _interopRequireWildcard(_handlebarsBase);
 	
 	// Each of these augment the Handlebars object. No need to setup here.
 	// (This is done to easily share code between commonjs and browse envs)
 	
-	var _handlebarsSafeString = __webpack_require__(25);
+	var _handlebarsSafeString = __webpack_require__(55);
 	
 	var _handlebarsSafeString2 = _interopRequireDefault(_handlebarsSafeString);
 	
-	var _handlebarsException = __webpack_require__(13);
+	var _handlebarsException = __webpack_require__(43);
 	
 	var _handlebarsException2 = _interopRequireDefault(_handlebarsException);
 	
-	var _handlebarsUtils = __webpack_require__(12);
+	var _handlebarsUtils = __webpack_require__(42);
 	
 	var Utils = _interopRequireWildcard(_handlebarsUtils);
 	
-	var _handlebarsRuntime = __webpack_require__(26);
+	var _handlebarsRuntime = __webpack_require__(56);
 	
 	var runtime = _interopRequireWildcard(_handlebarsRuntime);
 	
-	var _handlebarsNoConflict = __webpack_require__(27);
+	var _handlebarsNoConflict = __webpack_require__(57);
 	
 	var _handlebarsNoConflict2 = _interopRequireDefault(_handlebarsNoConflict);
 	
@@ -678,7 +1854,7 @@
 
 
 /***/ },
-/* 11 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -689,17 +1865,17 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _utils = __webpack_require__(12);
+	var _utils = __webpack_require__(42);
 	
-	var _exception = __webpack_require__(13);
+	var _exception = __webpack_require__(43);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
-	var _helpers = __webpack_require__(14);
+	var _helpers = __webpack_require__(44);
 	
-	var _decorators = __webpack_require__(22);
+	var _decorators = __webpack_require__(52);
 	
-	var _logger = __webpack_require__(24);
+	var _logger = __webpack_require__(54);
 	
 	var _logger2 = _interopRequireDefault(_logger);
 	
@@ -788,7 +1964,7 @@
 
 
 /***/ },
-/* 12 */
+/* 42 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -918,7 +2094,7 @@
 
 
 /***/ },
-/* 13 */
+/* 43 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -975,7 +2151,7 @@
 
 
 /***/ },
-/* 14 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -986,31 +2162,31 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _helpersBlockHelperMissing = __webpack_require__(15);
+	var _helpersBlockHelperMissing = __webpack_require__(45);
 	
 	var _helpersBlockHelperMissing2 = _interopRequireDefault(_helpersBlockHelperMissing);
 	
-	var _helpersEach = __webpack_require__(16);
+	var _helpersEach = __webpack_require__(46);
 	
 	var _helpersEach2 = _interopRequireDefault(_helpersEach);
 	
-	var _helpersHelperMissing = __webpack_require__(17);
+	var _helpersHelperMissing = __webpack_require__(47);
 	
 	var _helpersHelperMissing2 = _interopRequireDefault(_helpersHelperMissing);
 	
-	var _helpersIf = __webpack_require__(18);
+	var _helpersIf = __webpack_require__(48);
 	
 	var _helpersIf2 = _interopRequireDefault(_helpersIf);
 	
-	var _helpersLog = __webpack_require__(19);
+	var _helpersLog = __webpack_require__(49);
 	
 	var _helpersLog2 = _interopRequireDefault(_helpersLog);
 	
-	var _helpersLookup = __webpack_require__(20);
+	var _helpersLookup = __webpack_require__(50);
 	
 	var _helpersLookup2 = _interopRequireDefault(_helpersLookup);
 	
-	var _helpersWith = __webpack_require__(21);
+	var _helpersWith = __webpack_require__(51);
 	
 	var _helpersWith2 = _interopRequireDefault(_helpersWith);
 	
@@ -1027,14 +2203,14 @@
 
 
 /***/ },
-/* 15 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _utils = __webpack_require__(12);
+	var _utils = __webpack_require__(42);
 	
 	exports['default'] = function (instance) {
 	  instance.registerHelper('blockHelperMissing', function (context, options) {
@@ -1072,7 +2248,7 @@
 
 
 /***/ },
-/* 16 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1082,9 +2258,9 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _utils = __webpack_require__(12);
+	var _utils = __webpack_require__(42);
 	
-	var _exception = __webpack_require__(13);
+	var _exception = __webpack_require__(43);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
@@ -1172,7 +2348,7 @@
 
 
 /***/ },
-/* 17 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1182,7 +2358,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _exception = __webpack_require__(13);
+	var _exception = __webpack_require__(43);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
@@ -1203,14 +2379,14 @@
 
 
 /***/ },
-/* 18 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _utils = __webpack_require__(12);
+	var _utils = __webpack_require__(42);
 	
 	exports['default'] = function (instance) {
 	  instance.registerHelper('if', function (conditional, options) {
@@ -1238,7 +2414,7 @@
 
 
 /***/ },
-/* 19 */
+/* 49 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1270,7 +2446,7 @@
 
 
 /***/ },
-/* 20 */
+/* 50 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1288,14 +2464,14 @@
 
 
 /***/ },
-/* 21 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _utils = __webpack_require__(12);
+	var _utils = __webpack_require__(42);
 	
 	exports['default'] = function (instance) {
 	  instance.registerHelper('with', function (context, options) {
@@ -1327,7 +2503,7 @@
 
 
 /***/ },
-/* 22 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1338,7 +2514,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _decoratorsInline = __webpack_require__(23);
+	var _decoratorsInline = __webpack_require__(53);
 	
 	var _decoratorsInline2 = _interopRequireDefault(_decoratorsInline);
 	
@@ -1349,14 +2525,14 @@
 
 
 /***/ },
-/* 23 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _utils = __webpack_require__(12);
+	var _utils = __webpack_require__(42);
 	
 	exports['default'] = function (instance) {
 	  instance.registerDecorator('inline', function (fn, props, container, options) {
@@ -1384,14 +2560,14 @@
 
 
 /***/ },
-/* 24 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _utils = __webpack_require__(12);
+	var _utils = __webpack_require__(42);
 	
 	var logger = {
 	  methodMap: ['debug', 'info', 'warn', 'error'],
@@ -1437,7 +2613,7 @@
 
 
 /***/ },
-/* 25 */
+/* 55 */
 /***/ function(module, exports) {
 
 	// Build out our basic SafeString type
@@ -1458,7 +2634,7 @@
 
 
 /***/ },
-/* 26 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1478,15 +2654,15 @@
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
 	
-	var _utils = __webpack_require__(12);
+	var _utils = __webpack_require__(42);
 	
 	var Utils = _interopRequireWildcard(_utils);
 	
-	var _exception = __webpack_require__(13);
+	var _exception = __webpack_require__(43);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
-	var _base = __webpack_require__(11);
+	var _base = __webpack_require__(41);
 	
 	function checkRevision(compilerInfo) {
 	  var compilerRevision = compilerInfo && compilerInfo[0] || 1,
@@ -1761,7 +2937,7 @@
 
 
 /***/ },
-/* 27 */
+/* 57 */
 /***/ function(module, exports) {
 
 	/* global window */
@@ -1787,7 +2963,7 @@
 
 
 /***/ },
-/* 28 */
+/* 58 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1824,7 +3000,7 @@
 
 
 /***/ },
-/* 29 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1839,19 +3015,19 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _parser = __webpack_require__(30);
+	var _parser = __webpack_require__(60);
 	
 	var _parser2 = _interopRequireDefault(_parser);
 	
-	var _whitespaceControl = __webpack_require__(31);
+	var _whitespaceControl = __webpack_require__(61);
 	
 	var _whitespaceControl2 = _interopRequireDefault(_whitespaceControl);
 	
-	var _helpers = __webpack_require__(33);
+	var _helpers = __webpack_require__(63);
 	
 	var Helpers = _interopRequireWildcard(_helpers);
 	
-	var _utils = __webpack_require__(12);
+	var _utils = __webpack_require__(42);
 	
 	exports.parser = _parser2['default'];
 	
@@ -1878,7 +3054,7 @@
 
 
 /***/ },
-/* 30 */
+/* 60 */
 /***/ function(module, exports) {
 
 	/* istanbul ignore next */
@@ -2622,7 +3798,7 @@
 
 
 /***/ },
-/* 31 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2632,7 +3808,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _visitor = __webpack_require__(32);
+	var _visitor = __webpack_require__(62);
 	
 	var _visitor2 = _interopRequireDefault(_visitor);
 	
@@ -2849,7 +4025,7 @@
 
 
 /***/ },
-/* 32 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2859,7 +4035,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _exception = __webpack_require__(13);
+	var _exception = __webpack_require__(43);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
@@ -2995,7 +4171,7 @@
 
 
 /***/ },
-/* 33 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3015,7 +4191,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _exception = __webpack_require__(13);
+	var _exception = __webpack_require__(43);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
@@ -3231,7 +4407,7 @@
 
 
 /***/ },
-/* 34 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* eslint-disable new-cap */
@@ -3246,13 +4422,13 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _exception = __webpack_require__(13);
+	var _exception = __webpack_require__(43);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
-	var _utils = __webpack_require__(12);
+	var _utils = __webpack_require__(42);
 	
-	var _ast = __webpack_require__(28);
+	var _ast = __webpack_require__(58);
 	
 	var _ast2 = _interopRequireDefault(_ast);
 	
@@ -3809,7 +4985,7 @@
 
 
 /***/ },
-/* 35 */
+/* 65 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3819,15 +4995,15 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _base = __webpack_require__(11);
+	var _base = __webpack_require__(41);
 	
-	var _exception = __webpack_require__(13);
+	var _exception = __webpack_require__(43);
 	
 	var _exception2 = _interopRequireDefault(_exception);
 	
-	var _utils = __webpack_require__(12);
+	var _utils = __webpack_require__(42);
 	
-	var _codeGen = __webpack_require__(36);
+	var _codeGen = __webpack_require__(66);
 	
 	var _codeGen2 = _interopRequireDefault(_codeGen);
 	
@@ -4943,7 +6119,7 @@
 
 
 /***/ },
-/* 36 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* global define */
@@ -4951,7 +6127,7 @@
 	
 	exports.__esModule = true;
 	
-	var _utils = __webpack_require__(12);
+	var _utils = __webpack_require__(42);
 	
 	var SourceNode = undefined;
 	
@@ -5115,7 +6291,7 @@
 
 
 /***/ },
-/* 37 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* eslint-disable new-cap */
@@ -5128,7 +6304,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 	
-	var _visitor = __webpack_require__(32);
+	var _visitor = __webpack_require__(62);
 	
 	var _visitor2 = _interopRequireDefault(_visitor);
 	
@@ -5307,1165 +6483,13 @@
 
 
 /***/ },
-/* 38 */
+/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/**
-	 * Module dependencies.
-	 */
-	
-	var EventEmitter = __webpack_require__(39).EventEmitter;
-	var spawn = __webpack_require__(40).spawn;
-	var readlink = __webpack_require__(41).readlinkSync;
-	var path = __webpack_require__(42);
-	var dirname = path.dirname;
-	var basename = path.basename;
-	var fs = __webpack_require__(2);
-	
-	/**
-	 * Expose the root command.
-	 */
-	
-	exports = module.exports = new Command();
-	
-	/**
-	 * Expose `Command`.
-	 */
-	
-	exports.Command = Command;
-	
-	/**
-	 * Expose `Option`.
-	 */
-	
-	exports.Option = Option;
-	
-	/**
-	 * Initialize a new `Option` with the given `flags` and `description`.
-	 *
-	 * @param {String} flags
-	 * @param {String} description
-	 * @api public
-	 */
-	
-	function Option(flags, description) {
-	  this.flags = flags;
-	  this.required = ~flags.indexOf('<');
-	  this.optional = ~flags.indexOf('[');
-	  this.bool = !~flags.indexOf('-no-');
-	  flags = flags.split(/[ ,|]+/);
-	  if (flags.length > 1 && !/^[[<]/.test(flags[1])) this.short = flags.shift();
-	  this.long = flags.shift();
-	  this.description = description || '';
-	}
-	
-	/**
-	 * Return option name.
-	 *
-	 * @return {String}
-	 * @api private
-	 */
-	
-	Option.prototype.name = function() {
-	  return this.long
-	    .replace('--', '')
-	    .replace('no-', '');
-	};
-	
-	/**
-	 * Check if `arg` matches the short or long flag.
-	 *
-	 * @param {String} arg
-	 * @return {Boolean}
-	 * @api private
-	 */
-	
-	Option.prototype.is = function(arg) {
-	  return arg == this.short || arg == this.long;
-	};
-	
-	/**
-	 * Initialize a new `Command`.
-	 *
-	 * @param {String} name
-	 * @api public
-	 */
-	
-	function Command(name) {
-	  this.commands = [];
-	  this.options = [];
-	  this._execs = {};
-	  this._allowUnknownOption = false;
-	  this._args = [];
-	  this._name = name || '';
-	}
-	
-	/**
-	 * Inherit from `EventEmitter.prototype`.
-	 */
-	
-	Command.prototype.__proto__ = EventEmitter.prototype;
-	
-	/**
-	 * Add command `name`.
-	 *
-	 * The `.action()` callback is invoked when the
-	 * command `name` is specified via __ARGV__,
-	 * and the remaining arguments are applied to the
-	 * function for access.
-	 *
-	 * When the `name` is "*" an un-matched command
-	 * will be passed as the first arg, followed by
-	 * the rest of __ARGV__ remaining.
-	 *
-	 * Examples:
-	 *
-	 *      program
-	 *        .version('0.0.1')
-	 *        .option('-C, --chdir <path>', 'change the working directory')
-	 *        .option('-c, --config <path>', 'set config path. defaults to ./deploy.conf')
-	 *        .option('-T, --no-tests', 'ignore test hook')
-	 *
-	 *      program
-	 *        .command('setup')
-	 *        .description('run remote setup commands')
-	 *        .action(function() {
-	 *          console.log('setup');
-	 *        });
-	 *
-	 *      program
-	 *        .command('exec <cmd>')
-	 *        .description('run the given remote command')
-	 *        .action(function(cmd) {
-	 *          console.log('exec "%s"', cmd);
-	 *        });
-	 *
-	 *      program
-	 *        .command('teardown <dir> [otherDirs...]')
-	 *        .description('run teardown commands')
-	 *        .action(function(dir, otherDirs) {
-	 *          console.log('dir "%s"', dir);
-	 *          if (otherDirs) {
-	 *            otherDirs.forEach(function (oDir) {
-	 *              console.log('dir "%s"', oDir);
-	 *            });
-	 *          }
-	 *        });
-	 *
-	 *      program
-	 *        .command('*')
-	 *        .description('deploy the given env')
-	 *        .action(function(env) {
-	 *          console.log('deploying "%s"', env);
-	 *        });
-	 *
-	 *      program.parse(process.argv);
-	  *
-	 * @param {String} name
-	 * @param {String} [desc] for git-style sub-commands
-	 * @return {Command} the new command
-	 * @api public
-	 */
-	
-	Command.prototype.command = function(name, desc, opts) {
-	  opts = opts || {};
-	  var args = name.split(/ +/);
-	  var cmd = new Command(args.shift());
-	
-	  if (desc) {
-	    cmd.description(desc);
-	    this.executables = true;
-	    this._execs[cmd._name] = true;
-	    if (opts.isDefault) this.defaultExecutable = cmd._name;
-	  }
-	
-	  cmd._noHelp = !!opts.noHelp;
-	  this.commands.push(cmd);
-	  cmd.parseExpectedArgs(args);
-	  cmd.parent = this;
-	
-	  if (desc) return this;
-	  return cmd;
-	};
-	
-	/**
-	 * Define argument syntax for the top-level command.
-	 *
-	 * @api public
-	 */
-	
-	Command.prototype.arguments = function (desc) {
-	  return this.parseExpectedArgs(desc.split(/ +/));
-	};
-	
-	/**
-	 * Add an implicit `help [cmd]` subcommand
-	 * which invokes `--help` for the given command.
-	 *
-	 * @api private
-	 */
-	
-	Command.prototype.addImplicitHelpCommand = function() {
-	  this.command('help [cmd]', 'display help for [cmd]');
-	};
-	
-	/**
-	 * Parse expected `args`.
-	 *
-	 * For example `["[type]"]` becomes `[{ required: false, name: 'type' }]`.
-	 *
-	 * @param {Array} args
-	 * @return {Command} for chaining
-	 * @api public
-	 */
-	
-	Command.prototype.parseExpectedArgs = function(args) {
-	  if (!args.length) return;
-	  var self = this;
-	  args.forEach(function(arg) {
-	    var argDetails = {
-	      required: false,
-	      name: '',
-	      variadic: false
-	    };
-	
-	    switch (arg[0]) {
-	      case '<':
-	        argDetails.required = true;
-	        argDetails.name = arg.slice(1, -1);
-	        break;
-	      case '[':
-	        argDetails.name = arg.slice(1, -1);
-	        break;
-	    }
-	
-	    if (argDetails.name.length > 3 && argDetails.name.slice(-3) === '...') {
-	      argDetails.variadic = true;
-	      argDetails.name = argDetails.name.slice(0, -3);
-	    }
-	    if (argDetails.name) {
-	      self._args.push(argDetails);
-	    }
-	  });
-	  return this;
-	};
-	
-	/**
-	 * Register callback `fn` for the command.
-	 *
-	 * Examples:
-	 *
-	 *      program
-	 *        .command('help')
-	 *        .description('display verbose help')
-	 *        .action(function() {
-	 *           // output help here
-	 *        });
-	 *
-	 * @param {Function} fn
-	 * @return {Command} for chaining
-	 * @api public
-	 */
-	
-	Command.prototype.action = function(fn) {
-	  var self = this;
-	  var listener = function(args, unknown) {
-	    // Parse any so-far unknown options
-	    args = args || [];
-	    unknown = unknown || [];
-	
-	    var parsed = self.parseOptions(unknown);
-	
-	    // Output help if necessary
-	    outputHelpIfNecessary(self, parsed.unknown);
-	
-	    // If there are still any unknown options, then we simply
-	    // die, unless someone asked for help, in which case we give it
-	    // to them, and then we die.
-	    if (parsed.unknown.length > 0) {
-	      self.unknownOption(parsed.unknown[0]);
-	    }
-	
-	    // Leftover arguments need to be pushed back. Fixes issue #56
-	    if (parsed.args.length) args = parsed.args.concat(args);
-	
-	    self._args.forEach(function(arg, i) {
-	      if (arg.required && null == args[i]) {
-	        self.missingArgument(arg.name);
-	      } else if (arg.variadic) {
-	        if (i !== self._args.length - 1) {
-	          self.variadicArgNotLast(arg.name);
-	        }
-	
-	        args[i] = args.splice(i);
-	      }
-	    });
-	
-	    // Always append ourselves to the end of the arguments,
-	    // to make sure we match the number of arguments the user
-	    // expects
-	    if (self._args.length) {
-	      args[self._args.length] = self;
-	    } else {
-	      args.push(self);
-	    }
-	
-	    fn.apply(self, args);
-	  };
-	  var parent = this.parent || this;
-	  var name = parent === this ? '*' : this._name;
-	  parent.on(name, listener);
-	  if (this._alias) parent.on(this._alias, listener);
-	  return this;
-	};
-	
-	/**
-	 * Define option with `flags`, `description` and optional
-	 * coercion `fn`.
-	 *
-	 * The `flags` string should contain both the short and long flags,
-	 * separated by comma, a pipe or space. The following are all valid
-	 * all will output this way when `--help` is used.
-	 *
-	 *    "-p, --pepper"
-	 *    "-p|--pepper"
-	 *    "-p --pepper"
-	 *
-	 * Examples:
-	 *
-	 *     // simple boolean defaulting to false
-	 *     program.option('-p, --pepper', 'add pepper');
-	 *
-	 *     --pepper
-	 *     program.pepper
-	 *     // => Boolean
-	 *
-	 *     // simple boolean defaulting to true
-	 *     program.option('-C, --no-cheese', 'remove cheese');
-	 *
-	 *     program.cheese
-	 *     // => true
-	 *
-	 *     --no-cheese
-	 *     program.cheese
-	 *     // => false
-	 *
-	 *     // required argument
-	 *     program.option('-C, --chdir <path>', 'change the working directory');
-	 *
-	 *     --chdir /tmp
-	 *     program.chdir
-	 *     // => "/tmp"
-	 *
-	 *     // optional argument
-	 *     program.option('-c, --cheese [type]', 'add cheese [marble]');
-	 *
-	 * @param {String} flags
-	 * @param {String} description
-	 * @param {Function|Mixed} fn or default
-	 * @param {Mixed} defaultValue
-	 * @return {Command} for chaining
-	 * @api public
-	 */
-	
-	Command.prototype.option = function(flags, description, fn, defaultValue) {
-	  var self = this
-	    , option = new Option(flags, description)
-	    , oname = option.name()
-	    , name = camelcase(oname);
-	
-	  // default as 3rd arg
-	  if (typeof fn != 'function') {
-	    if (fn instanceof RegExp) {
-	      var regex = fn;
-	      fn = function(val, def) {
-	        var m = regex.exec(val);
-	        return m ? m[0] : def;
-	      }
-	    }
-	    else {
-	      defaultValue = fn;
-	      fn = null;
-	    }
-	  }
-	
-	  // preassign default value only for --no-*, [optional], or <required>
-	  if (false == option.bool || option.optional || option.required) {
-	    // when --no-* we make sure default is true
-	    if (false == option.bool) defaultValue = true;
-	    // preassign only if we have a default
-	    if (undefined !== defaultValue) self[name] = defaultValue;
-	  }
-	
-	  // register the option
-	  this.options.push(option);
-	
-	  // when it's passed assign the value
-	  // and conditionally invoke the callback
-	  this.on(oname, function(val) {
-	    // coercion
-	    if (null !== val && fn) val = fn(val, undefined === self[name]
-	      ? defaultValue
-	      : self[name]);
-	
-	    // unassigned or bool
-	    if ('boolean' == typeof self[name] || 'undefined' == typeof self[name]) {
-	      // if no value, bool true, and we have a default, then use it!
-	      if (null == val) {
-	        self[name] = option.bool
-	          ? defaultValue || true
-	          : false;
-	      } else {
-	        self[name] = val;
-	      }
-	    } else if (null !== val) {
-	      // reassign
-	      self[name] = val;
-	    }
-	  });
-	
-	  return this;
-	};
-	
-	/**
-	 * Allow unknown options on the command line.
-	 *
-	 * @param {Boolean} arg if `true` or omitted, no error will be thrown
-	 * for unknown options.
-	 * @api public
-	 */
-	Command.prototype.allowUnknownOption = function(arg) {
-	    this._allowUnknownOption = arguments.length === 0 || arg;
-	    return this;
-	};
-	
-	/**
-	 * Parse `argv`, settings options and invoking commands when defined.
-	 *
-	 * @param {Array} argv
-	 * @return {Command} for chaining
-	 * @api public
-	 */
-	
-	Command.prototype.parse = function(argv) {
-	  // implicit help
-	  if (this.executables) this.addImplicitHelpCommand();
-	
-	  // store raw args
-	  this.rawArgs = argv;
-	
-	  // guess name
-	  this._name = this._name || basename(argv[1], '.js');
-	
-	  // github-style sub-commands with no sub-command
-	  if (this.executables && argv.length < 3 && !this.defaultExecutable) {
-	    // this user needs help
-	    argv.push('--help');
-	  }
-	
-	  // process argv
-	  var parsed = this.parseOptions(this.normalize(argv.slice(2)));
-	  var args = this.args = parsed.args;
-	
-	  var result = this.parseArgs(this.args, parsed.unknown);
-	
-	  // executable sub-commands
-	  var name = result.args[0];
-	  if (this._execs[name] && typeof this._execs[name] != "function") {
-	    return this.executeSubCommand(argv, args, parsed.unknown);
-	  } else if (this.defaultExecutable) {
-	    // use the default subcommand
-	    args.unshift(name = this.defaultExecutable);
-	    return this.executeSubCommand(argv, args, parsed.unknown);
-	  }
-	
-	  return result;
-	};
-	
-	/**
-	 * Execute a sub-command executable.
-	 *
-	 * @param {Array} argv
-	 * @param {Array} args
-	 * @param {Array} unknown
-	 * @api private
-	 */
-	
-	Command.prototype.executeSubCommand = function(argv, args, unknown) {
-	  args = args.concat(unknown);
-	
-	  if (!args.length) this.help();
-	  if ('help' == args[0] && 1 == args.length) this.help();
-	
-	  // <cmd> --help
-	  if ('help' == args[0]) {
-	    args[0] = args[1];
-	    args[1] = '--help';
-	  }
-	
-	  // executable
-	  var f = argv[1];
-	  // name of the subcommand, link `pm-install`
-	  var bin = basename(f, '.js') + '-' + args[0];
-	
-	
-	  // In case of globally installed, get the base dir where executable
-	  //  subcommand file should be located at
-	  var baseDir
-	    , link = readlink(f);
-	
-	  // when symbolink is relative path
-	  if (link !== f && link.charAt(0) !== '/') {
-	    link = path.join(dirname(f), link)
-	  }
-	  baseDir = dirname(link);
-	
-	  // prefer local `./<bin>` to bin in the $PATH
-	  var localBin = path.join(baseDir, bin);
-	
-	  // whether bin file is a js script with explicit `.js` extension
-	  var isExplicitJS = false;
-	  if (exists(localBin + '.js')) {
-	    bin = localBin + '.js';
-	    isExplicitJS = true;
-	  } else if (exists(localBin)) {
-	    bin = localBin;
-	  }
-	
-	  args = args.slice(1);
-	
-	  var proc;
-	  if (process.platform !== 'win32') {
-	    if (isExplicitJS) {
-	      args.unshift(localBin);
-	      // add executable arguments to spawn
-	      args = (process.execArgv || []).concat(args);
-	
-	      proc = spawn('node', args, { stdio: 'inherit', customFds: [0, 1, 2] });
-	    } else {
-	      proc = spawn(bin, args, { stdio: 'inherit', customFds: [0, 1, 2] });
-	    }
-	  } else {
-	    args.unshift(localBin);
-	    proc = spawn(process.execPath, args, { stdio: 'inherit'});
-	  }
-	
-	  proc.on('close', process.exit.bind(process));
-	  proc.on('error', function(err) {
-	    if (err.code == "ENOENT") {
-	      console.error('\n  %s(1) does not exist, try --help\n', bin);
-	    } else if (err.code == "EACCES") {
-	      console.error('\n  %s(1) not executable. try chmod or run with root\n', bin);
-	    }
-	    process.exit(1);
-	  });
-	
-	  // Store the reference to the child process
-	  this.runningCommand = proc;
-	};
-	
-	/**
-	 * Normalize `args`, splitting joined short flags. For example
-	 * the arg "-abc" is equivalent to "-a -b -c".
-	 * This also normalizes equal sign and splits "--abc=def" into "--abc def".
-	 *
-	 * @param {Array} args
-	 * @return {Array}
-	 * @api private
-	 */
-	
-	Command.prototype.normalize = function(args) {
-	  var ret = []
-	    , arg
-	    , lastOpt
-	    , index;
-	
-	  for (var i = 0, len = args.length; i < len; ++i) {
-	    arg = args[i];
-	    if (i > 0) {
-	      lastOpt = this.optionFor(args[i-1]);
-	    }
-	
-	    if (arg === '--') {
-	      // Honor option terminator
-	      ret = ret.concat(args.slice(i));
-	      break;
-	    } else if (lastOpt && lastOpt.required) {
-	      ret.push(arg);
-	    } else if (arg.length > 1 && '-' == arg[0] && '-' != arg[1]) {
-	      arg.slice(1).split('').forEach(function(c) {
-	        ret.push('-' + c);
-	      });
-	    } else if (/^--/.test(arg) && ~(index = arg.indexOf('='))) {
-	      ret.push(arg.slice(0, index), arg.slice(index + 1));
-	    } else {
-	      ret.push(arg);
-	    }
-	  }
-	
-	  return ret;
-	};
-	
-	/**
-	 * Parse command `args`.
-	 *
-	 * When listener(s) are available those
-	 * callbacks are invoked, otherwise the "*"
-	 * event is emitted and those actions are invoked.
-	 *
-	 * @param {Array} args
-	 * @return {Command} for chaining
-	 * @api private
-	 */
-	
-	Command.prototype.parseArgs = function(args, unknown) {
-	  var name;
-	
-	  if (args.length) {
-	    name = args[0];
-	    if (this.listeners(name).length) {
-	      this.emit(args.shift(), args, unknown);
-	    } else {
-	      this.emit('*', args);
-	    }
-	  } else {
-	    outputHelpIfNecessary(this, unknown);
-	
-	    // If there were no args and we have unknown options,
-	    // then they are extraneous and we need to error.
-	    if (unknown.length > 0) {
-	      this.unknownOption(unknown[0]);
-	    }
-	  }
-	
-	  return this;
-	};
-	
-	/**
-	 * Return an option matching `arg` if any.
-	 *
-	 * @param {String} arg
-	 * @return {Option}
-	 * @api private
-	 */
-	
-	Command.prototype.optionFor = function(arg) {
-	  for (var i = 0, len = this.options.length; i < len; ++i) {
-	    if (this.options[i].is(arg)) {
-	      return this.options[i];
-	    }
-	  }
-	};
-	
-	/**
-	 * Parse options from `argv` returning `argv`
-	 * void of these options.
-	 *
-	 * @param {Array} argv
-	 * @return {Array}
-	 * @api public
-	 */
-	
-	Command.prototype.parseOptions = function(argv) {
-	  var args = []
-	    , len = argv.length
-	    , literal
-	    , option
-	    , arg;
-	
-	  var unknownOptions = [];
-	
-	  // parse options
-	  for (var i = 0; i < len; ++i) {
-	    arg = argv[i];
-	
-	    // literal args after --
-	    if ('--' == arg) {
-	      literal = true;
-	      continue;
-	    }
-	
-	    if (literal) {
-	      args.push(arg);
-	      continue;
-	    }
-	
-	    // find matching Option
-	    option = this.optionFor(arg);
-	
-	    // option is defined
-	    if (option) {
-	      // requires arg
-	      if (option.required) {
-	        arg = argv[++i];
-	        if (null == arg) return this.optionMissingArgument(option);
-	        this.emit(option.name(), arg);
-	      // optional arg
-	      } else if (option.optional) {
-	        arg = argv[i+1];
-	        if (null == arg || ('-' == arg[0] && '-' != arg)) {
-	          arg = null;
-	        } else {
-	          ++i;
-	        }
-	        this.emit(option.name(), arg);
-	      // bool
-	      } else {
-	        this.emit(option.name());
-	      }
-	      continue;
-	    }
-	
-	    // looks like an option
-	    if (arg.length > 1 && '-' == arg[0]) {
-	      unknownOptions.push(arg);
-	
-	      // If the next argument looks like it might be
-	      // an argument for this option, we pass it on.
-	      // If it isn't, then it'll simply be ignored
-	      if (argv[i+1] && '-' != argv[i+1][0]) {
-	        unknownOptions.push(argv[++i]);
-	      }
-	      continue;
-	    }
-	
-	    // arg
-	    args.push(arg);
-	  }
-	
-	  return { args: args, unknown: unknownOptions };
-	};
-	
-	/**
-	 * Return an object containing options as key-value pairs
-	 *
-	 * @return {Object}
-	 * @api public
-	 */
-	Command.prototype.opts = function() {
-	  var result = {}
-	    , len = this.options.length;
-	
-	  for (var i = 0 ; i < len; i++) {
-	    var key = camelcase(this.options[i].name());
-	    result[key] = key === 'version' ? this._version : this[key];
-	  }
-	  return result;
-	};
-	
-	/**
-	 * Argument `name` is missing.
-	 *
-	 * @param {String} name
-	 * @api private
-	 */
-	
-	Command.prototype.missingArgument = function(name) {
-	  console.error();
-	  console.error("  error: missing required argument `%s'", name);
-	  console.error();
-	  process.exit(1);
-	};
-	
-	/**
-	 * `Option` is missing an argument, but received `flag` or nothing.
-	 *
-	 * @param {String} option
-	 * @param {String} flag
-	 * @api private
-	 */
-	
-	Command.prototype.optionMissingArgument = function(option, flag) {
-	  console.error();
-	  if (flag) {
-	    console.error("  error: option `%s' argument missing, got `%s'", option.flags, flag);
-	  } else {
-	    console.error("  error: option `%s' argument missing", option.flags);
-	  }
-	  console.error();
-	  process.exit(1);
-	};
-	
-	/**
-	 * Unknown option `flag`.
-	 *
-	 * @param {String} flag
-	 * @api private
-	 */
-	
-	Command.prototype.unknownOption = function(flag) {
-	  if (this._allowUnknownOption) return;
-	  console.error();
-	  console.error("  error: unknown option `%s'", flag);
-	  console.error();
-	  process.exit(1);
-	};
-	
-	/**
-	 * Variadic argument with `name` is not the last argument as required.
-	 *
-	 * @param {String} name
-	 * @api private
-	 */
-	
-	Command.prototype.variadicArgNotLast = function(name) {
-	  console.error();
-	  console.error("  error: variadic arguments must be last `%s'", name);
-	  console.error();
-	  process.exit(1);
-	};
-	
-	/**
-	 * Set the program version to `str`.
-	 *
-	 * This method auto-registers the "-V, --version" flag
-	 * which will print the version number when passed.
-	 *
-	 * @param {String} str
-	 * @param {String} flags
-	 * @return {Command} for chaining
-	 * @api public
-	 */
-	
-	Command.prototype.version = function(str, flags) {
-	  if (0 == arguments.length) return this._version;
-	  this._version = str;
-	  flags = flags || '-V, --version';
-	  this.option(flags, 'output the version number');
-	  this.on('version', function() {
-	    process.stdout.write(str + '\n');
-	    process.exit(0);
-	  });
-	  return this;
-	};
-	
-	/**
-	 * Set the description to `str`.
-	 *
-	 * @param {String} str
-	 * @return {String|Command}
-	 * @api public
-	 */
-	
-	Command.prototype.description = function(str) {
-	  if (0 === arguments.length) return this._description;
-	  this._description = str;
-	  return this;
-	};
-	
-	/**
-	 * Set an alias for the command
-	 *
-	 * @param {String} alias
-	 * @return {String|Command}
-	 * @api public
-	 */
-	
-	Command.prototype.alias = function(alias) {
-	  if (0 == arguments.length) return this._alias;
-	  this._alias = alias;
-	  return this;
-	};
-	
-	/**
-	 * Set / get the command usage `str`.
-	 *
-	 * @param {String} str
-	 * @return {String|Command}
-	 * @api public
-	 */
-	
-	Command.prototype.usage = function(str) {
-	  var args = this._args.map(function(arg) {
-	    return humanReadableArgName(arg);
-	  });
-	
-	  var usage = '[options]'
-	    + (this.commands.length ? ' [command]' : '')
-	    + (this._args.length ? ' ' + args.join(' ') : '');
-	
-	  if (0 == arguments.length) return this._usage || usage;
-	  this._usage = str;
-	
-	  return this;
-	};
-	
-	/**
-	 * Get the name of the command
-	 *
-	 * @param {String} name
-	 * @return {String|Command}
-	 * @api public
-	 */
-	
-	Command.prototype.name = function() {
-	  return this._name;
-	};
-	
-	/**
-	 * Return the largest option length.
-	 *
-	 * @return {Number}
-	 * @api private
-	 */
-	
-	Command.prototype.largestOptionLength = function() {
-	  return this.options.reduce(function(max, option) {
-	    return Math.max(max, option.flags.length);
-	  }, 0);
-	};
-	
-	/**
-	 * Return help for options.
-	 *
-	 * @return {String}
-	 * @api private
-	 */
-	
-	Command.prototype.optionHelp = function() {
-	  var width = this.largestOptionLength();
-	
-	  // Prepend the help information
-	  return [pad('-h, --help', width) + '  ' + 'output usage information']
-	      .concat(this.options.map(function(option) {
-	        return pad(option.flags, width) + '  ' + option.description;
-	      }))
-	      .join('\n');
-	};
-	
-	/**
-	 * Return command help documentation.
-	 *
-	 * @return {String}
-	 * @api private
-	 */
-	
-	Command.prototype.commandHelp = function() {
-	  if (!this.commands.length) return '';
-	
-	  var commands = this.commands.filter(function(cmd) {
-	    return !cmd._noHelp;
-	  }).map(function(cmd) {
-	    var args = cmd._args.map(function(arg) {
-	      return humanReadableArgName(arg);
-	    }).join(' ');
-	
-	    return [
-	      cmd._name
-	        + (cmd._alias ? '|' + cmd._alias : '')
-	        + (cmd.options.length ? ' [options]' : '')
-	        + ' ' + args
-	      , cmd.description()
-	    ];
-	  });
-	
-	  var width = commands.reduce(function(max, command) {
-	    return Math.max(max, command[0].length);
-	  }, 0);
-	
-	  return [
-	    ''
-	    , '  Commands:'
-	    , ''
-	    , commands.map(function(cmd) {
-	      var desc = cmd[1] ? '  ' + cmd[1] : '';
-	      return pad(cmd[0], width) + desc;
-	    }).join('\n').replace(/^/gm, '    ')
-	    , ''
-	  ].join('\n');
-	};
-	
-	/**
-	 * Return program help documentation.
-	 *
-	 * @return {String}
-	 * @api private
-	 */
-	
-	Command.prototype.helpInformation = function() {
-	  var desc = [];
-	  if (this._description) {
-	    desc = [
-	      '  ' + this._description
-	      , ''
-	    ];
-	  }
-	
-	  var cmdName = this._name;
-	  if (this._alias) {
-	    cmdName = cmdName + '|' + this._alias;
-	  }
-	  var usage = [
-	    ''
-	    ,'  Usage: ' + cmdName + ' ' + this.usage()
-	    , ''
-	  ];
-	
-	  var cmds = [];
-	  var commandHelp = this.commandHelp();
-	  if (commandHelp) cmds = [commandHelp];
-	
-	  var options = [
-	    '  Options:'
-	    , ''
-	    , '' + this.optionHelp().replace(/^/gm, '    ')
-	    , ''
-	    , ''
-	  ];
-	
-	  return usage
-	    .concat(cmds)
-	    .concat(desc)
-	    .concat(options)
-	    .join('\n');
-	};
-	
-	/**
-	 * Output help information for this command
-	 *
-	 * @api public
-	 */
-	
-	Command.prototype.outputHelp = function(cb) {
-	  if (!cb) {
-	    cb = function(passthru) {
-	      return passthru;
-	    }
-	  }
-	  process.stdout.write(cb(this.helpInformation()));
-	  this.emit('--help');
-	};
-	
-	/**
-	 * Output help information and exit.
-	 *
-	 * @api public
-	 */
-	
-	Command.prototype.help = function(cb) {
-	  this.outputHelp(cb);
-	  process.exit();
-	};
-	
-	/**
-	 * Camel-case the given `flag`
-	 *
-	 * @param {String} flag
-	 * @return {String}
-	 * @api private
-	 */
-	
-	function camelcase(flag) {
-	  return flag.split('-').reduce(function(str, word) {
-	    return str + word[0].toUpperCase() + word.slice(1);
-	  });
-	}
-	
-	/**
-	 * Pad `str` to `width`.
-	 *
-	 * @param {String} str
-	 * @param {Number} width
-	 * @return {String}
-	 * @api private
-	 */
-	
-	function pad(str, width) {
-	  var len = Math.max(0, width - str.length);
-	  return str + Array(len + 1).join(' ');
-	}
-	
-	/**
-	 * Output help information if necessary
-	 *
-	 * @param {Command} command to output help for
-	 * @param {Array} array of options to search for -h or --help
-	 * @api private
-	 */
-	
-	function outputHelpIfNecessary(cmd, options) {
-	  options = options || [];
-	  for (var i = 0; i < options.length; i++) {
-	    if (options[i] == '--help' || options[i] == '-h') {
-	      cmd.outputHelp();
-	      process.exit(0);
-	    }
-	  }
-	}
-	
-	/**
-	 * Takes an argument an returns its human readable equivalent for help usage.
-	 *
-	 * @param {Object} arg
-	 * @return {String}
-	 * @api private
-	 */
-	
-	function humanReadableArgName(arg) {
-	  var nameOutput = arg.name + (arg.variadic === true ? '...' : '');
-	
-	  return arg.required
-	    ? '<' + nameOutput + '>'
-	    : '[' + nameOutput + ']'
-	}
-	
-	// for versions before node v0.8 when there weren't `fs.existsSync`
-	function exists(file) {
-	  try {
-	    if (fs.statSync(file).isFile()) {
-	      return true;
-	    }
-	  } catch (e) {
-	    return false;
-	  }
-	}
-	
-
-
-/***/ },
-/* 39 */
-/***/ function(module, exports) {
-
-	module.exports = require("events");
-
-/***/ },
-/* 40 */
-/***/ function(module, exports) {
-
-	module.exports = require("child_process");
-
-/***/ },
-/* 41 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var fs = __webpack_require__(2)
-	  , lstat = fs.lstatSync;
-	
-	exports.readlinkSync = function (p) {
-	  if (lstat(p).isSymbolicLink()) {
-	    return fs.readlinkSync(p);
-	  } else {
-	    return p;
-	  }
-	};
-	
-	
-
-
-/***/ },
-/* 42 */
-/***/ function(module, exports) {
-
-	module.exports = require("path");
-
-/***/ },
-/* 43 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var number = __webpack_require__(44).number;
-	var editors = __webpack_require__(47);
-	var extractFilename = __webpack_require__(44).extractFilename;
-	var openFactory = __webpack_require__(52).factory;
+	var number = __webpack_require__(69).number;
+	var editors = __webpack_require__(72);
+	var extractFilename = __webpack_require__(69).extractFilename;
+	var openFactory = __webpack_require__(77).factory;
 	
 	module.exports = {
 	  configure: function(options, cb) {
@@ -6524,11 +6548,11 @@
 
 
 /***/ },
-/* 44 */
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var osHomeDir = __webpack_require__(45)();
-	var path = __webpack_require__(42);
+	var osHomeDir = __webpack_require__(70)();
+	var path = __webpack_require__(17);
 	
 	module.exports = {
 	  number: function(value, fallback) {
@@ -6581,11 +6605,11 @@
 
 
 /***/ },
-/* 45 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-	var os = __webpack_require__(46);
+	var os = __webpack_require__(71);
 	
 	function homedir() {
 		var env = process.env;
@@ -6611,36 +6635,36 @@
 
 
 /***/ },
-/* 46 */
+/* 71 */
 /***/ function(module, exports) {
 
 	module.exports = require("os");
 
 /***/ },
-/* 47 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  atom: __webpack_require__(48),
-	  code: __webpack_require__(53),
-	  sublime: __webpack_require__(54),
-	  webstorm: __webpack_require__(55),
-	  phpstorm: __webpack_require__(57),
-	  idea14ce: __webpack_require__(58)
+	  atom: __webpack_require__(73),
+	  code: __webpack_require__(78),
+	  sublime: __webpack_require__(79),
+	  webstorm: __webpack_require__(80),
+	  phpstorm: __webpack_require__(82),
+	  idea14ce: __webpack_require__(83)
 	};
 
 
 /***/ },
-/* 48 */
+/* 73 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var atHomeDir = __webpack_require__(44).atHomeDir;
+	var atHomeDir = __webpack_require__(69).atHomeDir;
 	
 	var settings = {
 	  pattern: '{filename}:{line}:{column}'
 	};
 	
-	var detect = __webpack_require__(49).lazy('Atom Editor', ['atom'], '-h', {
+	var detect = __webpack_require__(74).lazy('Atom Editor', ['atom'], '-h', {
 	  darwin: [
 	    '/Applications/Atom.app/Contents/Resources/app/atom.sh'
 	  ],
@@ -6649,7 +6673,7 @@
 	  ]
 	});
 	
-	var open = __webpack_require__(52).detectAndOpenFactory(detect, settings);
+	var open = __webpack_require__(77).detectAndOpenFactory(detect, settings);
 	
 	module.exports = {
 	  settings: settings,
@@ -6659,12 +6683,12 @@
 
 
 /***/ },
-/* 49 */
+/* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Promise = __webpack_require__(50).Promise;
-	var check = __webpack_require__(51);
-	var any = __webpack_require__(44).any;
+	var Promise = __webpack_require__(75).Promise;
+	var check = __webpack_require__(76);
+	var any = __webpack_require__(69).any;
 	
 	function detect(name, commands, args, locations) {
 	  function run(task) {
@@ -6697,7 +6721,7 @@
 
 
 /***/ },
-/* 50 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;(function(global){
@@ -7049,13 +7073,13 @@
 
 
 /***/ },
-/* 51 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Promise = __webpack_require__(50).Promise;
-	var exec = __webpack_require__(40).exec;
-	var fs = __webpack_require__(2);
-	var quote = __webpack_require__(44).quote;
+	var Promise = __webpack_require__(75).Promise;
+	var exec = __webpack_require__(33).exec;
+	var fs = __webpack_require__(5);
+	var quote = __webpack_require__(69).quote;
 	
 	function checkCommand(cmd, name, args) {
 	  return new Promise(function(resolve, reject) {
@@ -7088,15 +7112,15 @@
 
 
 /***/ },
-/* 52 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Promise = __webpack_require__(50).Promise;
-	var exec = __webpack_require__(40).exec;
-	var number = __webpack_require__(44).number;
-	var quote = __webpack_require__(44).quote;
-	var extractFilename = __webpack_require__(44).extractFilename;
-	var append = __webpack_require__(44).append;
+	var Promise = __webpack_require__(75).Promise;
+	var exec = __webpack_require__(33).exec;
+	var number = __webpack_require__(69).number;
+	var quote = __webpack_require__(69).quote;
+	var extractFilename = __webpack_require__(69).extractFilename;
+	var append = __webpack_require__(69).append;
 	
 	function makeArguments(filename, settings) {
 	  var info = extractFilename(filename);
@@ -7163,16 +7187,16 @@
 
 
 /***/ },
-/* 53 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var atHomeDir = __webpack_require__(44).atHomeDir;
+	var atHomeDir = __webpack_require__(69).atHomeDir;
 	
 	var settings = {
 	  pattern: '-r -g {filename}:{line}:{column}'
 	};
 	
-	var detect = __webpack_require__(49).lazy('Visual Studio Code', ['code'], '-h', {
+	var detect = __webpack_require__(74).lazy('Visual Studio Code', ['code'], '-h', {
 	  darwin: [
 	    '/Applications/Visual Studio Code.app/Contents/MacOS/Electron'
 	  ],
@@ -7183,7 +7207,7 @@
 	  ]
 	});
 	
-	var open = __webpack_require__(52).detectAndOpenFactory(detect, settings);
+	var open = __webpack_require__(77).detectAndOpenFactory(detect, settings);
 	
 	module.exports = {
 	  settings: settings,
@@ -7193,14 +7217,14 @@
 
 
 /***/ },
-/* 54 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var settings = {
 	  pattern: '{filename}:{line}:{column}'
 	};
 	
-	var detect = __webpack_require__(49).lazy('Sublime Text', ['subl'], '-h', {
+	var detect = __webpack_require__(74).lazy('Sublime Text', ['subl'], '-h', {
 	  darwin: [
 	    '/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl'
 	  ],
@@ -7214,7 +7238,7 @@
 	  ]
 	});
 	
-	var open = __webpack_require__(52).detectAndOpenFactory(detect, settings);
+	var open = __webpack_require__(77).detectAndOpenFactory(detect, settings);
 	
 	module.exports = {
 	  settings: settings,
@@ -7224,17 +7248,17 @@
 
 
 /***/ },
-/* 55 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var ide = __webpack_require__(56);
+	var ide = __webpack_require__(81);
 	
 	var detect = ide.detect({
 	  appFolder: 'WebStorm',
 	  name: 'WebStorm IDE',
 	  executable: 'webstorm'
 	});
-	var open = __webpack_require__(52).detectAndOpenFactory(detect, ide.settings);
+	var open = __webpack_require__(77).detectAndOpenFactory(detect, ide.settings);
 	
 	module.exports = {
 	  settings: ide.settings,
@@ -7244,15 +7268,15 @@
 
 
 /***/ },
-/* 56 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var settings = {
 	  pattern: '{projectPath} --line {line} {filename}'
 	};
 	
-	var fs = __webpack_require__(2);
-	var path = __webpack_require__(42);
+	var fs = __webpack_require__(5);
+	var path = __webpack_require__(17);
 	
 	var winDirs = (function() {
 	  var jetbrainsFolder = 'c:/Program Files (x86)/JetBrains/';
@@ -7271,7 +7295,7 @@
 	})();
 	
 	var detect = function(ide) {
-	  return __webpack_require__(49).lazy(ide.name, [], '', {
+	  return __webpack_require__(74).lazy(ide.name, [], '', {
 	    darwin: [
 	      '/Applications/' + ide.appFolder + '.app/Contents/MacOS/' + ide.executable
 	    ],
@@ -7288,17 +7312,17 @@
 
 
 /***/ },
-/* 57 */
+/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var ide = __webpack_require__(56);
+	var ide = __webpack_require__(81);
 	
 	var detect = ide.detect({
 	  appFolder: 'PhpStorm',
 	  name: 'PhpStorm IDE',
 	  executable: 'phpstorm'
 	});
-	var open = __webpack_require__(52).detectAndOpenFactory(detect, ide.settings);
+	var open = __webpack_require__(77).detectAndOpenFactory(detect, ide.settings);
 	
 	module.exports = {
 	  settings: ide.settings,
@@ -7308,17 +7332,17 @@
 
 
 /***/ },
-/* 58 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var ide = __webpack_require__(56);
+	var ide = __webpack_require__(81);
 	
 	var detect = ide.detect({
 	  appFolder: 'IntelliJ IDEA 14 CE',
 	  name: 'IDEA 14 CE',
 	  executable: 'idea'
 	});
-	var open = __webpack_require__(52).detectAndOpenFactory(detect, ide.settings);
+	var open = __webpack_require__(77).detectAndOpenFactory(detect, ide.settings);
 	
 	module.exports = {
 	  settings: ide.settings,

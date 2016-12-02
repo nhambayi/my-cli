@@ -20,7 +20,6 @@ program
   .command("list", "list all templates", {isDefault: true})
   .option("-t, --template", "template")
   .option("-o, --output", "output filename")
-  .option("-f, --from", "template source file")
   .option("-c, --cheese [type]", "add the specified type of cheese [marble]", "marble")
   .parse(process.argv);
 
@@ -40,7 +39,7 @@ let parserOptions = {
 
 const args = minimist(process.argv.slice(2), parserOptions);
 
-if (args["verbose"]) {
+if (args["---verbose"]) {
     console.log(args);
 }
 
@@ -61,7 +60,7 @@ if (exists === false) {
     });
 }
 
-if (args["list"]) {
+if (args["---list"]) {
     fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function(err, data) {
         if (err) {
             return console.log(err);
@@ -76,7 +75,7 @@ if (args["list"]) {
     });
 }
 
-if (args["new"] === true) {
+if (args["---new"] === true) {
     crypto.randomBytes(12, function(err, buffer) {
         const token = buffer.toString("hex");
 
@@ -108,7 +107,7 @@ if (args["new"] === true) {
     });
 }
 
-if (args["add"] === true) {
+if (args["---add"] === true) {
     fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function(err, data) {
         if (err) {
             return console.log(err);
@@ -150,7 +149,7 @@ if (args["add"] === true) {
     });
 }
 
-if (args["edit"] === true) {
+if (args["---edit"] === true) {
 
     fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function(err, data) {
         if (err) {
@@ -181,10 +180,10 @@ if (args["edit"] === true) {
 
 }
 
-if (args["help"] === true) {
+if (args["---help"] === true) {
     console.log("Help Info");
 }
 
-if (args["error"] === true) {
+if (args["---error"] === true) {
 
 }

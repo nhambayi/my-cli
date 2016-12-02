@@ -1,3 +1,6 @@
+export interface ICommand {
+    execute(...args: string[]): void;
+}
 
 export interface ITemplateIndex {
     isConnected: boolean;
@@ -18,7 +21,7 @@ export interface ITemplate {
 
 export interface ITemplateStore {
     initialize(): Promise<void>;
-    add(): void;
+    add(template: ITemplate): void;
     update(): void;
     remove(): void;
     find(name: string, project: string): void;

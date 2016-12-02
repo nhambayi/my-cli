@@ -45,15 +45,15 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	const minimist = __webpack_require__(4);
+	const minimist = __webpack_require__(7);
 	const fs = __webpack_require__(2);
-	const Template_1 = __webpack_require__(5);
-	const TemplateDatabase_1 = __webpack_require__(6);
-	const SerializationHelper_1 = __webpack_require__(7);
+	const Template_1 = __webpack_require__(4);
+	const TemplateDatabase_1 = __webpack_require__(5);
+	const SerializationHelper_1 = __webpack_require__(3);
 	const handlebars_1 = __webpack_require__(8);
 	const program = __webpack_require__(38);
 	const openInEditor = __webpack_require__(43);
-	const crypto = __webpack_require__(3);
+	const crypto = __webpack_require__(6);
 	console.log("Welcome to TBD");
 	program
 	    .version("0.10.0")
@@ -62,7 +62,6 @@
 	    .command("list", "list all templates", { isDefault: true })
 	    .option("-t, --template", "template")
 	    .option("-o, --output", "output filename")
-	    .option("-f, --from", "template source file")
 	    .option("-c, --cheese [type]", "add the specified type of cheese [marble]", "marble")
 	    .parse(process.argv);
 	function getUserHome() {
@@ -77,7 +76,7 @@
 	    }
 	};
 	const args = minimist(process.argv.slice(2), parserOptions);
-	if (args["verbose"]) {
+	if (args["---verbose"]) {
 	    console.log(args);
 	}
 	let exists = fs.existsSync(args["templateFolder"]);
@@ -93,7 +92,7 @@
 	        }
 	    });
 	}
-	if (args["list"]) {
+	if (args["---list"]) {
 	    fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function (err, data) {
 	        if (err) {
 	            return console.log(err);
@@ -105,7 +104,7 @@
 	        }
 	    });
 	}
-	if (args["new"] === true) {
+	if (args["---new"] === true) {
 	    crypto.randomBytes(12, function (err, buffer) {
 	        const token = buffer.toString("hex");
 	        fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function (err, data) {
@@ -133,7 +132,7 @@
 	        });
 	    });
 	}
-	if (args["add"] === true) {
+	if (args["---add"] === true) {
 	    fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function (err, data) {
 	        if (err) {
 	            return console.log(err);
@@ -167,7 +166,7 @@
 	        }
 	    });
 	}
-	if (args["edit"] === true) {
+	if (args["---edit"] === true) {
 	    fs.readFile(args["templateFolder"] + "/.template-index.json", "utf8", function (err, data) {
 	        if (err) {
 	            return console.log(err);
@@ -191,10 +190,10 @@
 	        });
 	    });
 	}
-	if (args["help"] === true) {
+	if (args["---help"] === true) {
 	    console.log("Help Info");
 	}
-	if (args["error"] === true) {
+	if (args["---error"] === true) {
 	}
 
 
@@ -209,10 +208,60 @@
 /* 3 */
 /***/ function(module, exports) {
 
-	module.exports = require("crypto");
+	"use strict";
+	class SerializationHelper {
+	    static toInstance(obj, json) {
+	        let jsonObj = JSON.parse(json);
+	        if (typeof obj["fromJSON"] === "function") {
+	            obj["fromJSON"](jsonObj);
+	        }
+	        else {
+	            for (let propName in jsonObj) {
+	                obj[propName] = jsonObj[propName];
+	            }
+	        }
+	        return obj;
+	    }
+	}
+	exports.SerializationHelper = SerializationHelper;
+
 
 /***/ },
 /* 4 */
+/***/ function(module, exports) {
+
+	"use strict";
+	class Template {
+	    get id() {
+	        return this._id;
+	    }
+	    set id(value) {
+	        this._id = value;
+	    }
+	}
+	exports.Template = Template;
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	"use strict";
+	class TemplateDatabase {
+	    initialize() {
+	    }
+	}
+	exports.TemplateDatabase = TemplateDatabase;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	module.exports = require("crypto");
+
+/***/ },
+/* 7 */
 /***/ function(module, exports) {
 
 	module.exports = function (args, opts) {
@@ -451,56 +500,6 @@
 	    return /^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(e[-+]?\d+)?$/.test(x);
 	}
 	
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	"use strict";
-	class Template {
-	    get id() {
-	        return this._id;
-	    }
-	    set id(value) {
-	        this._id = value;
-	    }
-	}
-	exports.Template = Template;
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	"use strict";
-	class TemplateDatabase {
-	    initialize() {
-	    }
-	}
-	exports.TemplateDatabase = TemplateDatabase;
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports) {
-
-	"use strict";
-	class SerializationHelper {
-	    static toInstance(obj, json) {
-	        let jsonObj = JSON.parse(json);
-	        if (typeof obj["fromJSON"] === "function") {
-	            obj["fromJSON"](jsonObj);
-	        }
-	        else {
-	            for (let propName in jsonObj) {
-	                obj[propName] = jsonObj[propName];
-	            }
-	        }
-	        return obj;
-	    }
-	}
-	exports.SerializationHelper = SerializationHelper;
 
 
 /***/ },

@@ -40,16 +40,17 @@
 /******/ 	return __webpack_require__(0);
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ 0:
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	const fs = __webpack_require__(2);
-	const SerializationHelper_1 = __webpack_require__(3);
-	const Template_1 = __webpack_require__(4);
-	const TemplateDatabase_1 = __webpack_require__(5);
-	const crypto = __webpack_require__(6);
+	const fs = __webpack_require__(5);
+	const SerializationHelper_1 = __webpack_require__(35);
+	const Template_1 = __webpack_require__(29);
+	const TemplateDatabase_1 = __webpack_require__(36);
+	const crypto = __webpack_require__(27);
 	console.log("Creating...");
 	class CreateCommandArguments {
 	}
@@ -89,14 +90,39 @@
 
 
 /***/ },
-/* 1 */,
-/* 2 */
+
+/***/ 5:
 /***/ function(module, exports) {
 
 	module.exports = require("fs");
 
 /***/ },
-/* 3 */
+
+/***/ 27:
+/***/ function(module, exports) {
+
+	module.exports = require("crypto");
+
+/***/ },
+
+/***/ 29:
+/***/ function(module, exports) {
+
+	"use strict";
+	class Template {
+	    get id() {
+	        return this._id;
+	    }
+	    set id(value) {
+	        this._id = value;
+	    }
+	}
+	exports.Template = Template;
+
+
+/***/ },
+
+/***/ 35:
 /***/ function(module, exports) {
 
 	"use strict";
@@ -118,23 +144,8 @@
 
 
 /***/ },
-/* 4 */
-/***/ function(module, exports) {
 
-	"use strict";
-	class Template {
-	    get id() {
-	        return this._id;
-	    }
-	    set id(value) {
-	        this._id = value;
-	    }
-	}
-	exports.Template = Template;
-
-
-/***/ },
-/* 5 */
+/***/ 36:
 /***/ function(module, exports) {
 
 	"use strict";
@@ -145,12 +156,7 @@
 	exports.TemplateDatabase = TemplateDatabase;
 
 
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	module.exports = require("crypto");
-
 /***/ }
-/******/ ]);
+
+/******/ });
 //# sourceMappingURL=index-create.js.map

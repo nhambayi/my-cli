@@ -50,80 +50,7 @@
 
 
 /***/ },
-/* 1 */,
-/* 2 */
-/***/ function(module, exports) {
-
-	module.exports = require("fs");
-
-/***/ },
-/* 3 */,
-/* 4 */,
-/* 5 */,
-/* 6 */
-/***/ function(module, exports) {
-
-	module.exports = require("crypto");
-
-/***/ },
-/* 7 */,
-/* 8 */,
-/* 9 */,
-/* 10 */,
-/* 11 */,
-/* 12 */,
-/* 13 */,
-/* 14 */,
-/* 15 */,
-/* 16 */,
-/* 17 */,
-/* 18 */,
-/* 19 */,
-/* 20 */,
-/* 21 */,
-/* 22 */,
-/* 23 */,
-/* 24 */,
-/* 25 */,
-/* 26 */,
-/* 27 */,
-/* 28 */,
-/* 29 */,
-/* 30 */,
-/* 31 */,
-/* 32 */,
-/* 33 */,
-/* 34 */,
-/* 35 */,
-/* 36 */,
-/* 37 */,
-/* 38 */,
-/* 39 */,
-/* 40 */,
-/* 41 */,
-/* 42 */
-/***/ function(module, exports) {
-
-	module.exports = require("path");
-
-/***/ },
-/* 43 */,
-/* 44 */,
-/* 45 */,
-/* 46 */,
-/* 47 */,
-/* 48 */,
-/* 49 */,
-/* 50 */,
-/* 51 */,
-/* 52 */,
-/* 53 */,
-/* 54 */,
-/* 55 */,
-/* 56 */,
-/* 57 */,
-/* 58 */,
-/* 59 */
+/* 1 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -158,7 +85,8 @@
 	            });
 	        });
 	    }
-	    add() {
+	    add(template) {
+	        this.templateIndex.add(template);
 	    }
 	    update() {
 	    }
@@ -219,8 +147,8 @@
 
 
 /***/ },
-/* 60 */,
-/* 61 */
+/* 2 */,
+/* 3 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -230,11 +158,11 @@
 
 
 /***/ },
-/* 62 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	const fs = __webpack_require__(2);
+	const fs = __webpack_require__(5);
 	class FileStore {
 	    loadFile(path, callback) {
 	        fs.readFile(path, "utf8", (data, err) => {
@@ -263,11 +191,17 @@
 
 
 /***/ },
-/* 63 */
+/* 5 */
+/***/ function(module, exports) {
+
+	module.exports = require("fs");
+
+/***/ },
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	const chalk = __webpack_require__(64);
+	const chalk = __webpack_require__(7);
 	class Logger {
 	    log(message) {
 	        console.log(message);
@@ -283,15 +217,15 @@
 
 
 /***/ },
-/* 64 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-	var escapeStringRegexp = __webpack_require__(65);
-	var ansiStyles = __webpack_require__(66);
-	var stripAnsi = __webpack_require__(68);
-	var hasAnsi = __webpack_require__(70);
-	var supportsColor = __webpack_require__(71);
+	var escapeStringRegexp = __webpack_require__(8);
+	var ansiStyles = __webpack_require__(9);
+	var stripAnsi = __webpack_require__(11);
+	var hasAnsi = __webpack_require__(13);
+	var supportsColor = __webpack_require__(14);
 	var defineProps = Object.defineProperties;
 	var isSimpleWindowsTerm = process.platform === 'win32' && !/^xterm/i.test(process.env.TERM);
 	
@@ -405,7 +339,7 @@
 
 
 /***/ },
-/* 65 */
+/* 8 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -422,7 +356,7 @@
 
 
 /***/ },
-/* 66 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {'use strict';
@@ -491,10 +425,10 @@
 		get: assembleStyles
 	});
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(67)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)(module)))
 
 /***/ },
-/* 67 */
+/* 10 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -510,11 +444,11 @@
 
 
 /***/ },
-/* 68 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-	var ansiRegex = __webpack_require__(69)();
+	var ansiRegex = __webpack_require__(12)();
 	
 	module.exports = function (str) {
 		return typeof str === 'string' ? str.replace(ansiRegex, '') : str;
@@ -522,7 +456,7 @@
 
 
 /***/ },
-/* 69 */
+/* 12 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -532,17 +466,17 @@
 
 
 /***/ },
-/* 70 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-	var ansiRegex = __webpack_require__(69);
+	var ansiRegex = __webpack_require__(12);
 	var re = new RegExp(ansiRegex().source); // remove the `g` flag
 	module.exports = re.test.bind(re);
 
 
 /***/ },
-/* 71 */
+/* 14 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -598,9 +532,7 @@
 
 
 /***/ },
-/* 72 */,
-/* 73 */,
-/* 74 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -612,7 +544,7 @@
 	        step((generator = generator.apply(thisArg, _arguments)).next());
 	    });
 	};
-	const db = __webpack_require__(75);
+	const db = __webpack_require__(16);
 	class DiskDbTemplateIndex {
 	    constructor(pathToStore, templateCollectionName) {
 	        this.pathToStore = pathToStore;
@@ -640,7 +572,7 @@
 
 
 /***/ },
-/* 75 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -653,13 +585,13 @@
 	
 	'use strict';
 	//global modules
-	var path = __webpack_require__(42),
-	    c = __webpack_require__(76),
+	var path = __webpack_require__(17),
+	    c = __webpack_require__(18),
 	    e = c.red,
 	    s = c.green;
 	
 	//local modules
-	var util = __webpack_require__(80);
+	var util = __webpack_require__(22);
 	
 	
 	var db = {
@@ -690,7 +622,7 @@
 	                    util.writeToFile(p);
 	                }
 	                var _c = collections[i].replace('.json', '');
-	                this[_c] = new __webpack_require__(82)('./collection')(this, _c);
+	                this[_c] = new __webpack_require__(24)('./collection')(this, _c);
 	            }
 	        } else {
 	            console.log(e('Invalid Collections Array.', 'Expected Format : ', '[\'collection1\',\'collection2\',\'collection3\']'));
@@ -704,13 +636,19 @@
 
 
 /***/ },
-/* 76 */
+/* 17 */
+/***/ function(module, exports) {
+
+	module.exports = require("path");
+
+/***/ },
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-	var ansi = __webpack_require__(77);
-	var stripAnsi = __webpack_require__(78);
-	var hasColor = __webpack_require__(79);
+	var ansi = __webpack_require__(19);
+	var stripAnsi = __webpack_require__(20);
+	var hasColor = __webpack_require__(21);
 	var defineProps = Object.defineProperties;
 	var chalk = module.exports;
 	
@@ -773,7 +711,7 @@
 
 
 /***/ },
-/* 77 */
+/* 19 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -817,7 +755,7 @@
 
 
 /***/ },
-/* 78 */
+/* 20 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -827,7 +765,7 @@
 
 
 /***/ },
-/* 79 */
+/* 21 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -865,7 +803,7 @@
 
 
 /***/ },
-/* 80 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -877,8 +815,8 @@
 	 */
 	
 	/*jshint -W027*/
-	var fs = __webpack_require__(2);
-	var merge = __webpack_require__(81);
+	var fs = __webpack_require__(5);
+	var merge = __webpack_require__(23);
 	var util = {};
 	
 	util.isValidPath = function(path) {
@@ -1030,7 +968,7 @@
 
 
 /***/ },
-/* 81 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/*!
@@ -1208,19 +1146,19 @@
 		}
 	
 	})(typeof module === 'object' && module && typeof module.exports === 'object' && module.exports);
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(67)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)(module)))
 
 /***/ },
-/* 82 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var map = {
-		"./collection": 83,
-		"./collection.js": 83,
-		"./diskdb": 75,
-		"./diskdb.js": 75,
-		"./util": 80,
-		"./util.js": 80
+		"./collection": 25,
+		"./collection.js": 25,
+		"./diskdb": 16,
+		"./diskdb.js": 16,
+		"./util": 22,
+		"./util.js": 22
 	};
 	function webpackContext(req) {
 		return __webpack_require__(webpackContextResolve(req));
@@ -1233,11 +1171,11 @@
 	};
 	webpackContext.resolve = webpackContextResolve;
 	module.exports = webpackContext;
-	webpackContext.id = 82;
+	webpackContext.id = 24;
 
 
 /***/ },
-/* 83 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -1248,9 +1186,9 @@
 	 * Licensed under the MIT license.
 	 */
 	
-	var util = __webpack_require__(80),
-	    path = __webpack_require__(42),
-	    uuid = __webpack_require__(84);
+	var util = __webpack_require__(22),
+	    path = __webpack_require__(17),
+	    uuid = __webpack_require__(26);
 	
 	module.exports = function(db, collectionName) {
 	    var coltn = {};
@@ -1356,7 +1294,7 @@
 
 
 /***/ },
-/* 84 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;//     uuid.js
@@ -1417,7 +1355,7 @@
 	    // Moderately fast, high quality
 	    if (true) {
 	      try {
-	        var _rb = __webpack_require__(6).randomBytes;
+	        var _rb = __webpack_require__(27).randomBytes;
 	        _nodeRNG = _rng = _rb && function() {return _rb(16);};
 	        _rng();
 	      } catch(e) {}
@@ -1634,6 +1572,69 @@
 
 
 /***/ },
+/* 27 */
+/***/ function(module, exports) {
+
+	module.exports = require("crypto");
+
+/***/ },
+/* 28 */,
+/* 29 */,
+/* 30 */,
+/* 31 */,
+/* 32 */,
+/* 33 */,
+/* 34 */,
+/* 35 */,
+/* 36 */,
+/* 37 */,
+/* 38 */,
+/* 39 */,
+/* 40 */,
+/* 41 */,
+/* 42 */,
+/* 43 */,
+/* 44 */,
+/* 45 */,
+/* 46 */,
+/* 47 */,
+/* 48 */,
+/* 49 */,
+/* 50 */,
+/* 51 */,
+/* 52 */,
+/* 53 */,
+/* 54 */,
+/* 55 */,
+/* 56 */,
+/* 57 */,
+/* 58 */,
+/* 59 */,
+/* 60 */,
+/* 61 */,
+/* 62 */,
+/* 63 */,
+/* 64 */,
+/* 65 */,
+/* 66 */,
+/* 67 */,
+/* 68 */,
+/* 69 */,
+/* 70 */,
+/* 71 */,
+/* 72 */,
+/* 73 */,
+/* 74 */,
+/* 75 */,
+/* 76 */,
+/* 77 */,
+/* 78 */,
+/* 79 */,
+/* 80 */,
+/* 81 */,
+/* 82 */,
+/* 83 */,
+/* 84 */,
 /* 85 */
 /***/ function(module, exports) {
 
@@ -1644,11 +1645,11 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	const TemplateStore_1 = __webpack_require__(59);
-	const FileStore_1 = __webpack_require__(62);
-	const DiskDbTemplateIndex_1 = __webpack_require__(74);
-	const Logger_1 = __webpack_require__(63);
-	const Constants_1 = __webpack_require__(61);
+	const TemplateStore_1 = __webpack_require__(1);
+	const FileStore_1 = __webpack_require__(4);
+	const DiskDbTemplateIndex_1 = __webpack_require__(15);
+	const Logger_1 = __webpack_require__(6);
+	const Constants_1 = __webpack_require__(3);
 	const TypeMoq = __webpack_require__(87);
 	describe("Template Store", () => {
 	    const config = {

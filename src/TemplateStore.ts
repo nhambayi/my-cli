@@ -25,8 +25,8 @@ export class TemplateStore implements ITemplateStore {
         });
     }
 
-    add(): void {
-
+    add(template: ITemplate): void {
+        this.templateIndex.add(template);
     }
 
     update(): void {
