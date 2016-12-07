@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2015"
+    "target": "es2015",
+    "noImplicitAny": false
   },
   "files": [
     "src/tests/IndexTest.ts",
