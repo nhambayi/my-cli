@@ -1,6 +1,7 @@
 import { ITemplateStore, IApplicationConfiguration, ILogger, ITemplate, ICommand } from "../../Interfaces";
 import {Template} from "../../Template";
-let Table = require('easy-table');
+let Table = require("easy-table");
+
 
 export class AddCommand implements ICommand {
 
